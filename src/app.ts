@@ -56,7 +56,7 @@ app.use('/api', limiter);
 // Health check
 // ---------------------------------------------------------------------------
 
-app.get('/health', (_req: Request, res: Response) => {
+app.get('/api/v1/health', (_req: Request, res: Response) => {
   res.status(200).json({ status: 'ok' });
 });
 
