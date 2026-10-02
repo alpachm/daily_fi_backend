@@ -38,5 +38,5 @@ export const sequelize: Sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD,
   host: DB_HOST,
   port: DB_PORT,
   dialect: 'postgres',
-  logging: process.env.NODE_ENV === 'development' ? console.log : false,
+  logging: false,
 });
