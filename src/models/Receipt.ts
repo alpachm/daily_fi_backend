@@ -15,6 +15,8 @@ export class Receipt extends Model<InferAttributes<Receipt>, InferCreationAttrib
   declare file_url: string;
   declare type: ReceiptType;
   declare date: string;
+  declare created_at: CreationOptional<Date>;
+  declare updated_at: CreationOptional<Date>;
 }
 
 Receipt.init(
@@ -44,10 +46,22 @@ Receipt.init(
       type: DataTypes.DATEONLY,
       allowNull: false,
     },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
+    },
   },
   {
     sequelize,
     tableName: 'receipts',
-    timestamps: false,
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
   },
 );

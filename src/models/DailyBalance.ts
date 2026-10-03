@@ -19,6 +19,8 @@ export class DailyBalance extends Model<
   declare total_income: CreationOptional<number>;
   declare total_expenses: CreationOptional<number>;
   declare notes: string | null;
+  declare created_at: CreationOptional<Date>;
+  declare updated_at: CreationOptional<Date>;
 }
 
 DailyBalance.init(
@@ -60,10 +62,22 @@ DailyBalance.init(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
+    },
   },
   {
     sequelize,
     tableName: 'daily_balances',
-    timestamps: false,
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
   },
 );
