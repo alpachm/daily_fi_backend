@@ -79,5 +79,12 @@ DailyBalance.init(
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
+    indexes: [
+      {
+        name: 'daily_balances_user_date_unique',
+        unique: true,
+        fields: ['fk_user', 'date'],
+      },
+    ],
   },
 );

@@ -18,6 +18,19 @@ export const validate =
       return;
     }
 
-    (req as unknown as Record<string, unknown>)[source] = result.data;
+    if (source === 'query') {
+      // Express 5 exposes `req.query` as a read-only getter (no setter), so a
+      // plain assignment would throw. Redefine it as an own, configurable data
+      // property carrying the parsed value instead.
+      Object.defineProperty(req, 'query', {
+        value: result.data,
+        configurable: true,
+        enumerable: true,
+        writable: true,
+      });
+    } else {
+      (req as unknown as Record<string, unknown>)[source] = result.data;
+    }
+
     next();
   };
