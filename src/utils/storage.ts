@@ -4,15 +4,53 @@ import {
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
-import { randomUUID } from 'node:crypto';
+import { randomBytes } from 'node:crypto';
 import { extname } from 'node:path';
 import dotenv from 'dotenv';
 import sharp from 'sharp';
 
+import { ReceiptType } from '../enums/receiptType';
+
 // Load environment variables from `.env` into `process.env`.
 dotenv.config();
 
-const DEFAULT_FOLDER = 'receipts';
+/**
+ * Pads a numeric month/day to two digits (e.g. `4` -> `'04'`) so the R2 folder
+ * hierarchy stays chronologically sorted.
+ */
+function padToTwoDigits(value: number): string {
+  return String(value).padStart(2, '0');
+}
+
+/**
+ * Normalized, lower-case folder segment used in R2 object keys for each receipt
+ * operation type.
+ */
+export type ReceiptFolderType = 'compra' | 'venta';
+
+const RECEIPT_TYPE_FOLDER: Record<ReceiptType, ReceiptFolderType> = {
+  [ReceiptType.PURCHASE]: 'compra',
+  [ReceiptType.SALE]: 'venta',
+};
+
+/**
+ * Builds the hierarchical folder prefix used as the R2 object key base for a
+ * receipt upload, scoped per user, date, and operation type:
+ * `user@example.com/2026/10/04/compra`. Month and day are zero-padded to keep
+ * R2 folder listings chronologically sorted.
+ */
+export function buildReceiptFolder(
+  userEmail: string,
+  date: Date,
+  type: ReceiptType,
+): string {
+  const year = date.getUTCFullYear();
+  const month = padToTwoDigits(date.getUTCMonth() + 1);
+  const day = padToTwoDigits(date.getUTCDate());
+  const typeFolder = RECEIPT_TYPE_FOLDER[type];
+
+  return `${userEmail}/${year}/${month}/${day}/${typeFolder}`;
+}
 
 const IMAGE_MIME_TYPES: ReadonlySet<string> = new Set([
   'image/jpeg',
@@ -104,15 +142,20 @@ async function processFileForUpload(file: Express.Multer.File): Promise<{
 }
 
 /**
- * Uploads an in-memory Multer file to Cloudflare R2 and returns its object key
- * and public URL.
+ * Uploads an in-memory Multer file to Cloudflare R2 under the provided folder
+ * prefix and returns its generated object key and public URL.
+ *
+ * The final key follows `${folder}/${timestamp}_${randomHash}${extension}`,
+ * e.g. `user@example.com/2026/10/04/compra/1728045600_a1b2c.webp`.
  */
 export async function uploadToR2(
   file: Express.Multer.File,
-  folder: string = DEFAULT_FOLDER,
+  folder: string,
 ): Promise<{ key: string; url: string }> {
   const { buffer, mimetype, extension } = await processFileForUpload(file);
-  const key = `${folder}/${Date.now()}-${randomUUID()}${extension}`;
+  const timestamp = Date.now();
+  const randomHash = randomBytes(5).toString('hex');
+  const key = `${folder}/${timestamp}_${randomHash}${extension}`;
 
   await s3Client.send(
     new PutObjectCommand({

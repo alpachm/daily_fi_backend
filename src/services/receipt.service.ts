@@ -5,7 +5,7 @@ import { sequelize } from '../database';
 import type { CreateReceiptsInput, ReceiptDTO } from '../interfaces/receipt.interface';
 import { DailyBalance, Receipt } from '../models';
 import { AppError } from '../utils/AppError';
-import { deleteFromR2, getFromR2, uploadToR2 } from '../utils/storage';
+import { buildReceiptFolder, deleteFromR2, getFromR2, uploadToR2 } from '../utils/storage';
 
 const SUPPORTED_TARGET_FORMATS: ReadonlySet<string> = new Set(['jpg', 'png', 'webp']);
 
@@ -111,15 +111,20 @@ async function convertImage(
 
 /**
  * Uploads a batch of receipt files to Cloudflare R2 and persists their records
- * inside a single database transaction. If the database write fails, every
- * object uploaded in this batch is removed from R2 before the error re-throws.
+ * inside a single database transaction. Each object key is scoped by the
+ * authenticated user's email, the daily balance date, and the operation type,
+ * e.g. `user@example.com/2026/10/04/compra/1728045600_a1b2c.webp`. If the
+ * database write fails, every object uploaded in this batch is removed from R2
+ * before the error re-throws.
  */
 export async function uploadReceipts(
   userId: number,
+  userEmail: string,
   files: Express.Multer.File[],
   data: CreateReceiptsInput,
 ): Promise<ReceiptDTO[]> {
   const balance = await findOwnedBalance(userId, data.fk_daily_balance);
+  const folder = buildReceiptFolder(userEmail, new Date(balance.date), data.type);
 
   const uploaded: { key: string; url: string }[] = [];
 
@@ -127,7 +132,7 @@ export async function uploadReceipts(
   // that were already persisted so no orphan files remain in R2.
   try {
     for (const file of files) {
-      const result = await uploadToR2(file);
+      const result = await uploadToR2(file, folder);
       uploaded.push(result);
     }
   } catch (err) {

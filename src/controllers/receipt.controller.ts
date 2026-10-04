@@ -26,6 +26,7 @@ export const uploadReceiptsHandler = asyncHandler(
 
     await uploadReceipts(
       req.user!.pk_user,
+      req.user!.email,
       files,
       req.body as CreateReceiptsInput,
     );
