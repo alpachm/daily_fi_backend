@@ -18,10 +18,10 @@ import { asyncHandler } from '../utils/asyncHandler';
 
 export const uploadReceiptsHandler = asyncHandler(
   async (req: Request, res: Response) => {
-    const files = (req.files as Express.Multer.File[] | undefined) ?? [];
+    const files = req.files as Express.Multer.File[] | undefined;
 
-    if (files.length === 0) {
-      throw new AppError('No receipt files were uploaded', 400);
+    if (!files || files.length === 0) {
+      throw new AppError('No files were provided for upload.', 400);
     }
 
     const receipts = await uploadReceipts(

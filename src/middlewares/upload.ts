@@ -9,13 +9,14 @@ const ALLOWED_MIME_TYPES: ReadonlySet<string> = new Set([
   'application/pdf',
 ]);
 
-export const MAX_RECEIPT_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+export const MAX_RECEIPT_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+export const MAX_RECEIPT_FILE_COUNT = 100;
 
 /**
  * Multer instance configured for receipt uploads:
  * - Stores files in memory so they can be streamed to Cloudflare R2.
  * - Rejects any MIME type outside the receipt allow-list.
- * - Enforces a 5 MB maximum file size.
+ * - Enforces a 10 MB maximum file size.
  */
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -43,6 +44,6 @@ const upload = multer({
 export const uploadSingleReceipt = upload.single('receipt');
 
 /**
- * Middleware that accepts up to 10 files under the `receipts` form field.
+ * Middleware that accepts up to 50 files under the `receipts` form field.
  */
-export const uploadMultipleReceipts = upload.array('receipts', 10);
+export const uploadMultipleReceipts = upload.array('receipts', MAX_RECEIPT_FILE_COUNT);
