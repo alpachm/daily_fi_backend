@@ -1,0 +1,1708 @@
+{
+  "info": {
+    "name": "DAILY_FI",
+    "description": "# DAILY_FI API\n\nColección de Postman para la API REST del backend de **Daily Fi**.\n\n## Variables de colección\n\n| Variable | Descripción | Valor por defecto |\n|----------|-------------|-------------------|\n| `base_url` | URL base de la API | `http://localhost:3000/api/v1` |\n| `token` | Token JWT (Bearer) | *(vacío, se rellena al iniciar sesión)* |\n\n## Estructura de respuesta estándar\n\n- **Éxito:** `{ \"status\": \"success\", \"data\": ... }`\n- **Error:** `{ \"status\": \"fail\", \"message\": \"...\" }`",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "health",
+      "description": "Endpoints de monitoreo y disponibilidad del servicio. No requieren autenticación.",
+      "item": [
+        {
+          "name": "verify api status",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Verifica la disponibilidad del servicio (health check).\n\n- **Método:** `GET`\n- **Requiere token:** No\n- **Respuesta:** `200 OK` con `{ \"status\": \"ok\" }`."
+          },
+          "response": [
+            {
+              "name": "200 OK — Servicio disponible",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/health"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"ok\"\n}"
+            },
+            {
+              "name": "429 Too Many Requests — Límite excedido",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/health"
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Demasiadas peticiones. Intenta de nuevo más tarde.\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "auth",
+      "description": "Registro, inicio de sesión y gestión de credenciales de la cuenta.",
+      "item": [
+        {
+          "name": "register",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"usuario@correo.com\",\n  \"password\": \"Password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Registra un nuevo usuario.\n\n- **Método:** `POST`\n- **Requiere token:** No\n- **Cuerpo:** `email` (válido) y `password` (8 a 72 caracteres).\n\nÉxito: `201 Created` con `{ \"id\", \"email\" }`."
+          },
+          "response": [
+            {
+              "name": "201 Created — Usuario registrado",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": "{{base_url}}/auth/register"
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"data\": {\n    \"id\": 1,\n    \"email\": \"usuario@correo.com\"\n  }\n}"
+            },
+            {
+              "name": "400 Bad Request — Error de validación",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": "{{base_url}}/auth/register"
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Validation failed\",\n  \"errors\": [\n    { \"field\": \"email\", \"message\": \"Invalid email format\" },\n    { \"field\": \"password\", \"message\": \"Password must be at least 8 characters long\" }\n  ]\n}"
+            },
+            {
+              "name": "409 Conflict — El usuario ya existe",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": "{{base_url}}/auth/register"
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"User already exists\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data && data.data && data.data.token) {",
+                  "    pm.collectionVariables.set('token', data.data.token);",
+                  "    console.log('✅ Token JWT almacenado en la variable {{token}}');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"usuario@correo.com\",\n  \"password\": \"Password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Inicia sesión y devuelve un token JWT.\n\n- **Método:** `POST`\n- **Requiere token:** No\n- **Cuerpo:** `email` y `password`.\n\nEl script de prueba guarda el token en `{{token}}`."
+          },
+          "response": [
+            {
+              "name": "200 OK — Sesión iniciada",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": "{{base_url}}/auth/login"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"data\": {\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"user\": {\n      \"id\": 1,\n      \"email\": \"usuario@correo.com\"\n    }\n  }\n}"
+            },
+            {
+              "name": "400 Bad Request — Error de validación",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": "{{base_url}}/auth/login"
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Validation failed\",\n  \"errors\": [\n    { \"field\": \"email\", \"message\": \"Invalid email format\" }\n  ]\n}"
+            },
+            {
+              "name": "401 Unauthorized — Credenciales inválidas",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": "{{base_url}}/auth/login"
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Invalid email or password\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "change password",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"Password123\",\n  \"newPassword\": \"Password456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/users/change-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "change-password"
+              ]
+            },
+            "description": "Cambia la contraseña del usuario autenticado.\n\n- **Método:** `PATCH`\n- **Requiere token:** Sí\n- **Cuerpo:** `currentPassword` y `newPassword` (8 a 72 caracteres)."
+          },
+          "response": [
+            {
+              "name": "200 OK — Contraseña actualizada",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{base_url}}/users/change-password"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"data\": {\n    \"message\": \"Password updated successfully\"\n  }\n}"
+            },
+            {
+              "name": "400 Bad Request — Error de validación",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{base_url}}/users/change-password"
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Validation failed\",\n  \"errors\": [\n    { \"field\": \"newPassword\", \"message\": \"Password must be at least 8 characters long\" }\n  ]\n}"
+            },
+            {
+              "name": "401 Unauthorized — Token faltante o inválido",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{base_url}}/users/change-password"
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Authentication required. Provide a valid Bearer token.\"\n}"
+            },
+            {
+              "name": "401 Unauthorized — Contraseña actual incorrecta",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{base_url}}/users/change-password"
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Current password is incorrect\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "delete",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"Password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/users/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "me"
+              ]
+            },
+            "description": "Elimina la cuenta del usuario autenticado (junto con sus balances y comprobantes).\n\n- **Método:** `DELETE`\n- **Requiere token:** Sí\n- **Cuerpo:** `password` (contraseña actual)."
+          },
+          "response": [
+            {
+              "name": "200 OK — Cuenta eliminada",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{base_url}}/users/me"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"data\": {\n    \"message\": \"Account deleted successfully\"\n  }\n}"
+            },
+            {
+              "name": "400 Bad Request — Error de validación",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{base_url}}/users/me"
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Validation failed\",\n  \"errors\": [\n    { \"field\": \"password\", \"message\": \"Password is required\" }\n  ]\n}"
+            },
+            {
+              "name": "401 Unauthorized — Token faltante o inválido",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{base_url}}/users/me"
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Authentication required. Provide a valid Bearer token.\"\n}"
+            },
+            {
+              "name": "401 Unauthorized — Contraseña incorrecta",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{base_url}}/users/me"
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Password is incorrect\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "daily_balances",
+      "description": "Apertura, cierre, actualización, consulta, listado y eliminación de balances diarios (turnos).",
+      "item": [
+        {
+          "name": "create daily balance",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2026-10-04\",\n  \"opening_balance\": 1000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/daily-balances",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "daily-balances"
+              ]
+            },
+            "description": "Abre un nuevo balance diario (turno).\n\n- **Método:** `POST`\n- **Requiere token:** Sí\n- **Cuerpo:** `date` (YYYY-MM-DD) y `opening_balance` (≥ 0).\n\nNo se permiten dos turnos abiertos para la misma fecha (`409`)."
+          },
+          "response": [
+            {
+              "name": "201 Created — Balance creado",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": "{{base_url}}/daily-balances"
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"data\": {\n    \"id\": 1,\n    \"userId\": 1,\n    \"date\": \"2026-10-04\",\n    \"openingBalance\": 1000,\n    \"closingBalance\": 0,\n    \"totalIncome\": 0,\n    \"totalExpenses\": 0,\n    \"notes\": null,\n    \"createdAt\": \"2026-10-04T09:00:00.000Z\",\n    \"updatedAt\": \"2026-10-04T09:00:00.000Z\"\n  }\n}"
+            },
+            {
+              "name": "400 Bad Request — Error de validación",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": "{{base_url}}/daily-balances"
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Validation failed\",\n  \"errors\": [\n    { \"field\": \"date\", \"message\": \"Date must use the YYYY-MM-DD format\" }\n  ]\n}"
+            },
+            {
+              "name": "401 Unauthorized — Token faltante o inválido",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": "{{base_url}}/daily-balances"
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Authentication required. Provide a valid Bearer token.\"\n}"
+            },
+            {
+              "name": "409 Conflict — Ya existe un balance para la fecha",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": "{{base_url}}/daily-balances"
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"A daily balance already exists for this date. Close the current shift first.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "close daily balance",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"closing_balance\": 1500\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/daily-balances/:id/close",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "daily-balances",
+                ":id",
+                "close"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "ID del balance diario"
+                }
+              ]
+            },
+            "description": "Cierra un turno calculando ingresos y gastos a partir del saldo de cierre.\n\n- **Método:** `PATCH`\n- **Requiere token:** Sí\n- **Parámetro de ruta:** `id` (integer).\n- **Cuerpo:** `closing_balance` (≥ 0) y `opening_balance` (opcional).\n\n- Si `closing >= opening` → `totalIncome = closing - opening`.\n- Si `closing < opening` → `totalExpenses = opening - closing`."
+          },
+          "response": [
+            {
+              "name": "200 OK — Turno cerrado",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{base_url}}/daily-balances/:id/close"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"data\": {\n    \"id\": 1,\n    \"userId\": 1,\n    \"date\": \"2026-10-04\",\n    \"openingBalance\": 1000,\n    \"closingBalance\": 1500,\n    \"totalIncome\": 500,\n    \"totalExpenses\": 0,\n    \"notes\": null,\n    \"createdAt\": \"2026-10-04T09:00:00.000Z\",\n    \"updatedAt\": \"2026-10-04T18:00:00.000Z\"\n  }\n}"
+            },
+            {
+              "name": "400 Bad Request — Error de validación",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{base_url}}/daily-balances/:id/close"
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Validation failed\",\n  \"errors\": [\n    { \"field\": \"closing_balance\", \"message\": \"Closing balance must be greater than or equal to 0\" }\n  ]\n}"
+            },
+            {
+              "name": "401 Unauthorized — Token faltante o inválido",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{base_url}}/daily-balances/:id/close"
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Authentication required. Provide a valid Bearer token.\"\n}"
+            },
+            {
+              "name": "403 Forbidden — No autorizado",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{base_url}}/daily-balances/:id/close"
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"You are not authorized to access this daily balance\"\n}"
+            },
+            {
+              "name": "404 Not Found — Balance no encontrado",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{base_url}}/daily-balances/:id/close"
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Daily balance not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "update daily balance",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"opening_balance\": 1000,\n  \"closing_balance\": 1500\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/daily-balances/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "daily-balances",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "ID del balance diario"
+                }
+              ]
+            },
+            "description": "Actualiza un balance diario (saldo de apertura y/o cierre).\n\n- **Método:** `PATCH`\n- **Requiere token:** Sí\n- **Parámetro de ruta:** `id` (integer).\n- **Cuerpo:** `closing_balance` (obligatorio) y `opening_balance` (opcional)."
+          },
+          "response": [
+            {
+              "name": "200 OK — Balance actualizado",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{base_url}}/daily-balances/:id"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"data\": {\n    \"id\": 1,\n    \"userId\": 1,\n    \"date\": \"2026-10-04\",\n    \"openingBalance\": 1000,\n    \"closingBalance\": 1500,\n    \"totalIncome\": 500,\n    \"totalExpenses\": 0,\n    \"notes\": null,\n    \"createdAt\": \"2026-10-04T09:00:00.000Z\",\n    \"updatedAt\": \"2026-10-04T18:00:00.000Z\"\n  }\n}"
+            },
+            {
+              "name": "400 Bad Request — Error de validación",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{base_url}}/daily-balances/:id"
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Validation failed\",\n  \"errors\": [\n    { \"field\": \"closing_balance\", \"message\": \"Closing balance must be greater than or equal to 0\" }\n  ]\n}"
+            },
+            {
+              "name": "401 Unauthorized — Token faltante o inválido",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{base_url}}/daily-balances/:id"
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Authentication required. Provide a valid Bearer token.\"\n}"
+            },
+            {
+              "name": "403 Forbidden — No autorizado",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{base_url}}/daily-balances/:id"
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"You are not authorized to access this daily balance\"\n}"
+            },
+            {
+              "name": "404 Not Found — Balance no encontrado",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{base_url}}/daily-balances/:id"
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Daily balance not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "get balance per day",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/daily-balances/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "daily-balances",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "ID del balance diario"
+                }
+              ]
+            },
+            "description": "Obtiene un balance diario por su ID (se verifica la propiedad).\n\n- **Método:** `GET`\n- **Requiere token:** Sí\n- **Parámetro de ruta:** `id` (integer)."
+          },
+          "response": [
+            {
+              "name": "200 OK — Balance obtenido",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/daily-balances/:id"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"data\": {\n    \"id\": 1,\n    \"userId\": 1,\n    \"date\": \"2026-10-04\",\n    \"openingBalance\": 1000,\n    \"closingBalance\": 1500,\n    \"totalIncome\": 500,\n    \"totalExpenses\": 0,\n    \"notes\": null,\n    \"createdAt\": \"2026-10-04T09:00:00.000Z\",\n    \"updatedAt\": \"2026-10-04T18:00:00.000Z\"\n  }\n}"
+            },
+            {
+              "name": "401 Unauthorized — Token faltante o inválido",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/daily-balances/:id"
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Authentication required. Provide a valid Bearer token.\"\n}"
+            },
+            {
+              "name": "403 Forbidden — No autorizado",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/daily-balances/:id"
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"You are not authorized to access this daily balance\"\n}"
+            },
+            {
+              "name": "404 Not Found — Balance no encontrado",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/daily-balances/:id"
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Daily balance not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "get all daily balances",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/daily-balances",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "daily-balances"
+              ],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2026-10-01",
+                  "description": "Fecha inicial (YYYY-MM-DD)",
+                  "disabled": true
+                },
+                {
+                  "key": "endDate",
+                  "value": "2026-10-31",
+                  "description": "Fecha final (YYYY-MM-DD)",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Número de página",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "100",
+                  "description": "Elementos por página (máx. 100)",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Lista los balances diarios del usuario autenticado (con filtros opcionales).\n\n- **Método:** `GET`\n- **Requiere token:** Sí\n- **Query opcional:** `startDate`, `endDate`, `page`, `limit`."
+          },
+          "response": [
+            {
+              "name": "200 OK — Lista de balances",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/daily-balances"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"data\": [\n    {\n      \"id\": 1,\n      \"userId\": 1,\n      \"date\": \"2026-10-04\",\n      \"openingBalance\": 1000,\n      \"closingBalance\": 1500,\n      \"totalIncome\": 500,\n      \"totalExpenses\": 0,\n      \"notes\": null,\n      \"createdAt\": \"2026-10-04T09:00:00.000Z\",\n      \"updatedAt\": \"2026-10-04T18:00:00.000Z\"\n    }\n  ]\n}"
+            },
+            {
+              "name": "400 Bad Request — Error de validación",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/daily-balances"
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Validation failed\",\n  \"errors\": [\n    { \"field\": \"startDate\", \"message\": \"Date must use the YYYY-MM-DD format\" }\n  ]\n}"
+            },
+            {
+              "name": "401 Unauthorized — Token faltante o inválido",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/daily-balances"
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Authentication required. Provide a valid Bearer token.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "delete daily balance",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/daily-balances/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "daily-balances",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "ID del balance diario"
+                }
+              ]
+            },
+            "description": "Elimina un balance diario por su ID (se verifica la propiedad).\n\n- **Método:** `DELETE`\n- **Requiere token:** Sí\n- **Parámetro de ruta:** `id` (integer)."
+          },
+          "response": [
+            {
+              "name": "200 OK — Balance eliminado",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{base_url}}/daily-balances/:id"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"data\": {\n    \"message\": \"Daily balance deleted successfully\"\n  }\n}"
+            },
+            {
+              "name": "401 Unauthorized — Token faltante o inválido",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{base_url}}/daily-balances/:id"
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Authentication required. Provide a valid Bearer token.\"\n}"
+            },
+            {
+              "name": "404 Not Found — Balance no encontrado",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{base_url}}/daily-balances/:id"
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Daily balance not found\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "receipts",
+      "description": "Carga, listado, descarga y eliminación de comprobantes asociados a un balance diario.",
+      "item": [
+        {
+          "name": "upload receipts",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "fk_daily_balance",
+                  "value": "1",
+                  "type": "text",
+                  "description": "ID del balance diario"
+                },
+                {
+                  "key": "description",
+                  "value": "Compra de insumos",
+                  "type": "text",
+                  "description": "Opcional (máx. 255)"
+                },
+                {
+                  "key": "category",
+                  "value": "Insumos",
+                  "type": "text",
+                  "description": "Opcional (máx. 255)"
+                },
+                {
+                  "key": "type",
+                  "value": "PURCHASE",
+                  "type": "text",
+                  "description": "PURCHASE (por defecto) o SALE"
+                },
+                {
+                  "key": "receipts",
+                  "type": "file",
+                  "src": [],
+                  "description": "1 a 100 archivos (JPEG, PNG, WebP, PDF; máx. 10 MB)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/receipts/bulk",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "receipts",
+                "bulk"
+              ]
+            },
+            "description": "Sube uno o más comprobantes contra un balance diario.\n\n- **Método:** `POST`\n- **Requiere token:** Sí\n- **Content-Type:** `multipart/form-data`\n- **Campos:** `receipts` (archivo, obligatorio), `fk_daily_balance` (obligatorio), `description`, `category`, `type` (opcionales).\n\n## Formatos permitidos\nJPEG, PNG, WebP y PDF (máx. 10 MB por archivo)."
+          },
+          "response": [
+            {
+              "name": "201 Created — Comprobantes subidos",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": "{{base_url}}/receipts/bulk"
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"2 receipts uploaded successfully\",\n  \"data\": {\n    \"count\": 2\n  }\n}"
+            },
+            {
+              "name": "400 Bad Request — Error de validación",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": "{{base_url}}/receipts/bulk"
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Validation failed\",\n  \"errors\": [\n    { \"field\": \"fk_daily_balance\", \"message\": \"Daily balance ID must be a positive integer\" }\n  ]\n}"
+            },
+            {
+              "name": "400 Bad Request — Sin archivos",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": "{{base_url}}/receipts/bulk"
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"No files were provided for upload.\"\n}"
+            },
+            {
+              "name": "401 Unauthorized — Token faltante o inválido",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": "{{base_url}}/receipts/bulk"
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Authentication required. Provide a valid Bearer token.\"\n}"
+            },
+            {
+              "name": "415 Unsupported Media Type — Formato no permitido",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": "{{base_url}}/receipts/bulk"
+              },
+              "status": "Unsupported Media Type",
+              "code": 415,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Unsupported file type. Allowed formats: JPEG, PNG, WebP, PDF.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "get receipts per daily balance",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/receipts/daily-balance/:dailyBalanceId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "receipts",
+                "daily-balance",
+                ":dailyBalanceId"
+              ],
+              "variable": [
+                {
+                  "key": "dailyBalanceId",
+                  "value": "1",
+                  "description": "ID del balance diario"
+                }
+              ]
+            },
+            "description": "Lista los comprobantes asociados a un balance diario específico.\n\n- **Método:** `GET`\n- **Requiere token:** Sí\n- **Parámetro de ruta:** `dailyBalanceId` (integer).\n\n> Cada comprobante incluye una `fileUrl` temporal (URL firmada) generada al momento."
+          },
+          "response": [
+            {
+              "name": "200 OK — Lista de comprobantes",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/receipts/daily-balance/:dailyBalanceId"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"data\": [\n    {\n      \"id\": 1,\n      \"userId\": 1,\n      \"dailyBalanceId\": 1,\n      \"fileUrl\": \"https://<bucket>.r2.cloudflarestorage.com/...?X-Amz-Signature=...\",\n      \"type\": \"PURCHASE\",\n      \"date\": \"2026-10-04\",\n      \"description\": \"Compra de insumos\",\n      \"category\": \"Insumos\",\n      \"createdAt\": \"2026-10-04T10:00:00.000Z\",\n      \"updatedAt\": \"2026-10-04T10:00:00.000Z\"\n    }\n  ]\n}"
+            },
+            {
+              "name": "401 Unauthorized — Token faltante o inválido",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/receipts/daily-balance/:dailyBalanceId"
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Authentication required. Provide a valid Bearer token.\"\n}"
+            },
+            {
+              "name": "403 Forbidden — No autorizado",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/receipts/daily-balance/:dailyBalanceId"
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"You are not authorized to access this daily balance\"\n}"
+            },
+            {
+              "name": "404 Not Found — Balance no encontrado",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/receipts/daily-balance/:dailyBalanceId"
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Daily balance not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "download receipt",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/receipts/:id/download",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "receipts",
+                ":id",
+                "download"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "ID del comprobante"
+                }
+              ]
+            },
+            "description": "Redirige a una URL firmada temporal que fuerza la descarga del comprobante como archivo adjunto.\n\n- **Método:** `GET`\n- **Requiere token:** Sí\n- **Parámetro de ruta:** `id` (integer).\n\n> Devuelve `302 Found` con la cabecera `Location` apuntando a la URL firmada (válida 15 minutos)."
+          },
+          "response": [
+            {
+              "name": "302 Found — Redirección a URL firmada",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/receipts/:id/download"
+              },
+              "status": "Found",
+              "code": 302,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Location",
+                  "value": "https://<bucket>.r2.cloudflarestorage.com/...?X-Amz-Signature=...",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": ""
+            },
+            {
+              "name": "401 Unauthorized — Token faltante o inválido",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/receipts/:id/download"
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Authentication required. Provide a valid Bearer token.\"\n}"
+            },
+            {
+              "name": "404 Not Found — Comprobante no encontrado",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/receipts/:id/download"
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Receipt not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "delete receipt",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/receipts/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "receipts",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "ID del comprobante"
+                }
+              ]
+            },
+            "description": "Elimina un comprobante (objeto en R2 + registro en base de datos), verificando la propiedad.\n\n- **Método:** `DELETE`\n- **Requiere token:** Sí\n- **Parámetro de ruta:** `id` (integer).\n\n> Éxito: `204 No Content` (sin cuerpo)."
+          },
+          "response": [
+            {
+              "name": "204 No Content — Comprobante eliminado",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{base_url}}/receipts/:id"
+              },
+              "status": "No Content",
+              "code": 204,
+              "_postman_previewlanguage": "text",
+              "header": [],
+              "cookie": [],
+              "body": ""
+            },
+            {
+              "name": "401 Unauthorized — Token faltante o inválido",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{base_url}}/receipts/:id"
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Authentication required. Provide a valid Bearer token.\"\n}"
+            },
+            {
+              "name": "403 Forbidden — No autorizado",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{base_url}}/receipts/:id"
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"You are not authorized to access this receipt\"\n}"
+            },
+            {
+              "name": "404 Not Found — Comprobante no encontrado",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{base_url}}/receipts/:id"
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Receipt not found\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  }
+}
