@@ -6,11 +6,18 @@ import {
 import { randomUUID } from 'node:crypto';
 import { extname } from 'node:path';
 import dotenv from 'dotenv';
+import sharp from 'sharp';
 
 // Load environment variables from `.env` into `process.env`.
 dotenv.config();
 
 const DEFAULT_FOLDER = 'receipts';
+
+const IMAGE_MIME_TYPES: ReadonlySet<string> = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+]);
 
 /**
  * Reads a required environment variable and fails fast with a clear message if
@@ -55,6 +62,47 @@ const s3Client = new S3Client({
 });
 
 /**
+ * Prepares an in-memory Multer file for upload:
+ * - PDFs are uploaded byte-for-byte without re-encoding.
+ * - JPEG/PNG/WebP images are resized to a maximum of 1200x1200 (never
+ *   upscaling smaller images) and re-encoded as WebP at quality 75 to reduce
+ *   storage and bandwidth usage.
+ */
+async function processFileForUpload(file: Express.Multer.File): Promise<{
+  buffer: Buffer;
+  mimetype: string;
+  extension: string;
+}> {
+  if (file.mimetype === 'application/pdf') {
+    return {
+      buffer: file.buffer,
+      mimetype: file.mimetype,
+      extension: extname(file.originalname) || '.pdf',
+    };
+  }
+
+  if (IMAGE_MIME_TYPES.has(file.mimetype)) {
+    const buffer = await sharp(file.buffer)
+      .resize(1200, 1200, { fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 75 })
+      .toBuffer();
+
+    return {
+      buffer,
+      mimetype: 'image/webp',
+      extension: '.webp',
+    };
+  }
+
+  // Unknown MIME type: fall back to uploading the original buffer unchanged.
+  return {
+    buffer: file.buffer,
+    mimetype: file.mimetype,
+    extension: extname(file.originalname),
+  };
+}
+
+/**
  * Uploads an in-memory Multer file to Cloudflare R2 and returns its object key
  * and public URL.
  */
@@ -62,15 +110,15 @@ export async function uploadToR2(
   file: Express.Multer.File,
   folder: string = DEFAULT_FOLDER,
 ): Promise<{ key: string; url: string }> {
-  const extension = extname(file.originalname);
+  const { buffer, mimetype, extension } = await processFileForUpload(file);
   const key = `${folder}/${Date.now()}-${randomUUID()}${extension}`;
 
   await s3Client.send(
     new PutObjectCommand({
       Bucket: getBucketName(),
       Key: key,
-      Body: file.buffer,
-      ContentType: file.mimetype,
+      Body: buffer,
+      ContentType: mimetype,
     }),
   );
 
