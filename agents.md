@@ -93,3 +93,11 @@ Antes de dar por completado cualquier ticket o cambio en el código:
 2. **Verificación de Servidor:** Ejecuta `npm run dev` y confirma que el servidor arranca correctamente.
 3. **Prueba de Salud:** Verifica la ruta `GET http://localhost:4000/health`.
 4. **Verificación de Build:** Ejecuta `npm run build` y asegura la generación de la carpeta `dist/`.
+
+### Mantenimiento Obligatorio de Documentación API (Postman)
+
+1. **Sincronización en Tiempo Real:** La colección de Postman ubicada en `documentation.postman_collection.json` es la fuente de verdad de la API. Todo cambio en el código de rutas/endpoints debe reflejarse inmediatamente en este archivo:
+    - **Nuevo Endpoint:** Crear la petición correspondiente con su método, ruta, headers, body de ejemplo y posibles respuestas (éxito y errores).
+    - **Modificación de Endpoint:** Actualizar la documentación **únicamente** si el cambio altera la firma del contrato (parámetros de entrada, headers, esquema del body o estructura de respuesta).
+    - **Eliminación de Endpoint:** Remover completamente la petición de la colección.
+2. **Restricción de Comandos de Publicación:** Queda **estrictamente prohibido** ejecutar el comando `npm run docs:push` (o cualquier script automatizado de sincronización remota). La actualización de la documentación debe ser local en el archivo JSON. El desarrollador/revisor ejecutará la publicación manualmente tras la inspección correspondiente.
