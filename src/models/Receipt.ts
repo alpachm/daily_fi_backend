@@ -12,9 +12,11 @@ export class Receipt extends Model<InferAttributes<Receipt>, InferCreationAttrib
   declare pk_receipts: CreationOptional<number>;
   declare fk_user: number;
   declare fk_daily_balance: number;
-  declare file_url: string;
+  declare file_key: string;
   declare type: ReceiptType;
   declare date: string;
+  declare description: string | null;
+  declare category: string | null;
   declare created_at: CreationOptional<Date>;
   declare updated_at: CreationOptional<Date>;
 }
@@ -34,9 +36,17 @@ Receipt.init(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    file_url: {
+    file_key: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    description: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    category: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
     },
     type: {
       type: DataTypes.ENUM(ReceiptType.PURCHASE, ReceiptType.SALE),
