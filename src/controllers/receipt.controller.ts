@@ -24,13 +24,19 @@ export const uploadReceiptsHandler = asyncHandler(
       throw new AppError('No files were provided for upload.', 400);
     }
 
-    const receipts = await uploadReceipts(
+    await uploadReceipts(
       req.user!.pk_user,
       files,
       req.body as CreateReceiptsInput,
     );
 
-    res.status(201).json({ status: 'success', data: receipts });
+    const uploadedCount = files.length;
+
+    res.status(201).json({
+      status: 'success',
+      message: `${uploadedCount} receipts uploaded successfully`,
+      data: { count: uploadedCount },
+    });
   },
 );
 
