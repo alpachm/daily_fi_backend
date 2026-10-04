@@ -1,5 +1,6 @@
 import {
   DeleteObjectCommand,
+  GetObjectCommand,
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
@@ -135,4 +136,32 @@ export async function deleteFromR2(key: string): Promise<void> {
       Key: key,
     }),
   );
+}
+
+/**
+ * Downloads an object from Cloudflare R2 by its key and returns its binary
+ * content together with the stored `Content-Type`.
+ */
+export async function getFromR2(
+  key: string,
+): Promise<{ buffer: Buffer; contentType: string }> {
+  const result = await s3Client.send(
+    new GetObjectCommand({
+      Bucket: getBucketName(),
+      Key: key,
+    }),
+  );
+
+  const body = result.Body;
+
+  if (!body) {
+    throw new Error(`Object not found in R2: ${key}`);
+  }
+
+  const bytes = await body.transformToByteArray();
+
+  return {
+    buffer: Buffer.from(bytes),
+    contentType: result.ContentType ?? 'application/octet-stream',
+  };
 }

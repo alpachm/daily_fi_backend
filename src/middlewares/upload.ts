@@ -41,3 +41,8 @@ const upload = multer({
  * Middleware that accepts a single file under the `receipt` form field.
  */
 export const uploadSingleReceipt = upload.single('receipt');
+
+/**
+ * Middleware that accepts up to 10 files under the `receipts` form field.
+ */
+export const uploadMultipleReceipts = upload.array('receipts', 10);
