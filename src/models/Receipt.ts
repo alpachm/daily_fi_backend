@@ -12,7 +12,6 @@ export class Receipt extends Model<InferAttributes<Receipt>, InferCreationAttrib
   declare pk_receipts: CreationOptional<number>;
   declare fk_user: number;
   declare fk_daily_balance: number;
-  declare file_url: string;
   declare file_key: string;
   declare type: ReceiptType;
   declare date: string;
@@ -35,10 +34,6 @@ Receipt.init(
     },
     fk_daily_balance: {
       type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    file_url: {
-      type: DataTypes.STRING,
       allowNull: false,
     },
     file_key: {

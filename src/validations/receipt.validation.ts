@@ -40,7 +40,3 @@ export const receiptsByDailyBalanceParamSchema = z.object({
 export const receiptIdParamSchema = z.object({
   id: positiveIntSchema('Receipt ID'),
 });
-
-export const downloadReceiptQuerySchema = z.object({
-  format: z.enum(['jpg', 'png', 'webp']).optional(),
-});

@@ -4,6 +4,7 @@ import {
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { randomBytes } from 'node:crypto';
 import { extname } from 'node:path';
 import dotenv from 'dotenv';
@@ -84,15 +85,14 @@ const getR2Endpoint = (): string => requireEnv('R2_ENDPOINT');
 const getR2AccessKeyId = (): string => requireEnv('R2_ACCESS_KEY_ID');
 const getR2SecretAccessKey = (): string => requireEnv('R2_SECRET_ACCESS_KEY');
 const getBucketName = (): string => requireEnv('R2_BUCKET_NAME');
-const getPublicUrl = (): string =>
-  requireEnv('R2_PUBLIC_URL').replace(/\/+$/, '');
+const getR2Region = (): string => requireEnv('R2_REGION');
 
 // ---------------------------------------------------------------------------
 // S3 client (Cloudflare R2 is S3-compatible)
 // ---------------------------------------------------------------------------
 
 const s3Client = new S3Client({
-  region: 'auto',
+  region: getR2Region(),
   endpoint: getR2Endpoint(),
   credentials: {
     accessKeyId: getR2AccessKeyId(),
@@ -143,7 +143,7 @@ async function processFileForUpload(file: Express.Multer.File): Promise<{
 
 /**
  * Uploads an in-memory Multer file to Cloudflare R2 under the provided folder
- * prefix and returns its generated object key and public URL.
+ * prefix and returns its generated object key.
  *
  * The final key follows `${folder}/${timestamp}_${randomHash}${extension}`,
  * e.g. `user@example.com/2026/10/04/compra/1728045600_a1b2c.webp`.
@@ -151,7 +151,7 @@ async function processFileForUpload(file: Express.Multer.File): Promise<{
 export async function uploadToR2(
   file: Express.Multer.File,
   folder: string,
-): Promise<{ key: string; url: string }> {
+): Promise<string> {
   const { buffer, mimetype, extension } = await processFileForUpload(file);
   const timestamp = Date.now();
   const randomHash = randomBytes(5).toString('hex');
@@ -166,7 +166,7 @@ export async function uploadToR2(
     }),
   );
 
-  return { key, url: `${getPublicUrl()}/${key}` };
+  return key;
 }
 
 /**
@@ -182,29 +182,31 @@ export async function deleteFromR2(key: string): Promise<void> {
 }
 
 /**
- * Downloads an object from Cloudflare R2 by its key and returns its binary
- * content together with the stored `Content-Type`.
+ * Default lifetime for presigned download URLs (15 minutes).
  */
-export async function getFromR2(
+export const PRESIGNED_URL_EXPIRES_IN_SECONDS = 900;
+
+/**
+ * Generates a temporary, signed GET URL for a private R2 object. When
+ * `responseContentDisposition` is provided, R2 serves the object with that
+ * header so the browser forces a download instead of rendering it inline.
+ */
+export async function createPresignedDownloadUrl(
   key: string,
-): Promise<{ buffer: Buffer; contentType: string }> {
-  const result = await s3Client.send(
-    new GetObjectCommand({
-      Bucket: getBucketName(),
-      Key: key,
-    }),
-  );
+  options: {
+    expiresIn?: number;
+    responseContentDisposition?: string;
+  } = {},
+): Promise<string> {
+  const command = new GetObjectCommand({
+    Bucket: getBucketName(),
+    Key: key,
+    ...(options.responseContentDisposition
+      ? { ResponseContentDisposition: options.responseContentDisposition }
+      : {}),
+  });
 
-  const body = result.Body;
-
-  if (!body) {
-    throw new Error(`Object not found in R2: ${key}`);
-  }
-
-  const bytes = await body.transformToByteArray();
-
-  return {
-    buffer: Buffer.from(bytes),
-    contentType: result.ContentType ?? 'application/octet-stream',
-  };
+  return getSignedUrl(s3Client, command, {
+    expiresIn: options.expiresIn ?? PRESIGNED_URL_EXPIRES_IN_SECONDS,
+  });
 }

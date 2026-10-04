@@ -5,14 +5,12 @@ import {
   downloadReceiptHandler,
   getReceiptsByDayHandler,
   uploadReceiptsHandler,
-  viewReceiptHandler,
 } from '../controllers/receipt.controller';
 import { requireAuth } from '../middlewares/auth.middleware';
 import { uploadMultipleReceipts } from '../middlewares/upload';
 import { validate } from '../middlewares/validate.middleware';
 import {
   createReceiptsSchema,
-  downloadReceiptQuerySchema,
   receiptIdParamSchema,
   receiptsByDailyBalanceParamSchema,
 } from '../validations/receipt.validation';
@@ -36,20 +34,11 @@ router.get(
   getReceiptsByDayHandler,
 );
 
-// View/stream a receipt (redirects to the public R2 URL).
-router.get(
-  '/:id/view',
-  requireAuth,
-  validate(receiptIdParamSchema, 'params'),
-  viewReceiptHandler,
-);
-
-// Download a receipt (optionally converted on the fly via `?format=`).
+// Redirect to a temporary presigned URL that forces the receipt download.
 router.get(
   '/:id/download',
   requireAuth,
   validate(receiptIdParamSchema, 'params'),
-  validate(downloadReceiptQuerySchema, 'query'),
   downloadReceiptHandler,
 );
 

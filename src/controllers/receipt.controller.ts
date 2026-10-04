@@ -2,14 +2,12 @@ import { type Request, type Response } from 'express';
 
 import type {
   CreateReceiptsInput,
-  DownloadReceiptQuery,
   ReceiptIdParam,
   ReceiptsByDailyBalanceParam,
 } from '../interfaces/receipt.interface';
 import {
   deleteReceipt,
-  getReceiptFileStreamOrBuffer,
-  getReceiptFileUrl,
+  getReceiptDownloadUrl,
   getReceiptsByDailyBalance,
   uploadReceipts,
 } from '../services/receipt.service';
@@ -50,22 +48,12 @@ export const getReceiptsByDayHandler = asyncHandler(
   },
 );
 
-export const viewReceiptHandler = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params as unknown as ReceiptIdParam;
-  const url = await getReceiptFileUrl(req.user!.pk_user, id);
-
-  res.redirect(url);
-});
-
 export const downloadReceiptHandler = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params as unknown as ReceiptIdParam;
-    const { format } = req.query as unknown as DownloadReceiptQuery;
-    const file = await getReceiptFileStreamOrBuffer(req.user!.pk_user, id, format);
+    const url = await getReceiptDownloadUrl(req.user!.pk_user, id);
 
-    res.setHeader('Content-Type', file.contentType);
-    res.setHeader('Content-Disposition', `attachment; filename="${file.filename}"`);
-    res.send(file.buffer);
+    res.redirect(url);
   },
 );
 
