@@ -51,8 +51,17 @@ export const dailyBalanceIdParamSchema = z.object({
     .positive('ID must be a positive integer'),
 });
 
-export const listDailyBalancesQuerySchema = z
+/**
+ * Query parameters for the GET /daily-balances collection endpoint.
+ *
+ * - date (optional): when present, returns the single balance for that day
+ *   instead of a paginated list. Must be a valid YYYY-MM-DD calendar date.
+ * - startDate / endDate (optional): inclusive range used when listing.
+ * - page / limit (optional): pagination controls for the list response.
+ */
+export const getDailyBalancesQuerySchema = z
   .object({
+    date: dateOnlySchema.optional(),
     startDate: dateOnlySchema.optional(),
     endDate: dateOnlySchema.optional(),
     page: z.coerce.number().int().min(1, 'Page must be at least 1').optional(),

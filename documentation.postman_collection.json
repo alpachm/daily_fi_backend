@@ -1015,23 +1015,22 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/daily-balances/:id",
+              "raw": "{{base_url}}/daily-balances?date=2026-10-04",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "daily-balances",
-                ":id"
+                "daily-balances"
               ],
-              "variable": [
+              "query": [
                 {
-                  "key": "id",
-                  "value": "1",
-                  "description": "ID del balance diario"
+                  "key": "date",
+                  "value": "2026-10-04",
+                  "description": "Fecha del balance (YYYY-MM-DD)"
                 }
               ]
             },
-            "description": "Obtiene un balance diario por su ID (se verifica la propiedad).\n\n- **Método:** `GET`\n- **Requiere token:** Sí\n- **Parámetro de ruta:** `id` (integer)."
+            "description": "Obtiene el balance diario del usuario autenticado para una fecha determinada.\n\n- **Método:** `GET`\n- **Requiere token:** Sí\n- **Query obligatorio:** `date` (`YYYY-MM-DD`)."
           },
           "response": [
             {
@@ -1039,7 +1038,7 @@
               "originalRequest": {
                 "method": "GET",
                 "header": [],
-                "url": "{{base_url}}/daily-balances/:id"
+                "url": "{{base_url}}/daily-balances?date=2026-10-04"
               },
               "status": "OK",
               "code": 200,
@@ -1059,7 +1058,7 @@
               "originalRequest": {
                 "method": "GET",
                 "header": [],
-                "url": "{{base_url}}/daily-balances/:id"
+                "url": "{{base_url}}/daily-balances?date=2026-10-04"
               },
               "status": "Unauthorized",
               "code": 401,
@@ -1075,14 +1074,14 @@
               "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Authentication required. Provide a valid Bearer token.\"\n}"
             },
             {
-              "name": "403 Forbidden — No autorizado",
+              "name": "400 Bad Request — Fecha inválida",
               "originalRequest": {
                 "method": "GET",
                 "header": [],
-                "url": "{{base_url}}/daily-balances/:id"
+                "url": "{{base_url}}/daily-balances?date=invalid"
               },
-              "status": "Forbidden",
-              "code": 403,
+              "status": "Bad Request",
+              "code": 400,
               "_postman_previewlanguage": "json",
               "header": [
                 {
@@ -1092,14 +1091,14 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"You are not authorized to access this daily balance\"\n}"
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Validation failed\",\n  \"errors\": [\n    { \"field\": \"date\", \"message\": \"Date must use the YYYY-MM-DD format\" }\n  ]\n}"
             },
             {
               "name": "404 Not Found — Balance no encontrado",
               "originalRequest": {
                 "method": "GET",
                 "header": [],
-                "url": "{{base_url}}/daily-balances/:id"
+                "url": "{{base_url}}/daily-balances?date=2026-10-04"
               },
               "status": "Not Found",
               "code": 404,
