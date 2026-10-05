@@ -3,7 +3,7 @@ import type {
   CloseDailyBalanceInput,
   CreateDailyBalanceInput,
   DailyBalanceDTO,
-  ListDailyBalancesQuery,
+  GetDailyBalancesQuery,
 } from '../interfaces/dailyBalance.interface';
 import { DailyBalance } from '../models';
 import { AppError } from '../utils/AppError';
@@ -104,7 +104,7 @@ export async function closeDailyBalance(
 
 export async function listDailyBalances(
   userId: number,
-  query: ListDailyBalancesQuery,
+  query: GetDailyBalancesQuery,
 ): Promise<DailyBalanceDTO[]> {
   const where: WhereOptions<DailyBalanceAttributes> = { fk_user: userId };
 
@@ -138,9 +138,21 @@ export async function listDailyBalances(
 
 export async function getDailyBalance(
   userId: number,
-  id: number,
+  date: string,
 ): Promise<DailyBalanceDTO> {
-  const balance = await findOwnedBalance(userId, id);
+  // Filter strictly by the authenticated user ID and the requested date so a
+  // request can never resolve (or leak) another user's balance. A record that
+  // does not belong to the caller simply does not match the filter and is
+  // reported as 404, preserving the previous lookup's "not found" contract
+  // without disclosing whether the date exists for a different user.
+  const balance = await DailyBalance.findOne({
+    where: { fk_user: userId, date },
+  });
+
+  if (!balance) {
+    throw new AppError('Daily balance not found', 404);
+  }
+
   return toDTO(balance);
 }
 

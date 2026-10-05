@@ -3,8 +3,7 @@ import {
   closeDailyBalanceHandler,
   createDailyBalanceHandler,
   deleteDailyBalanceHandler,
-  getDailyBalanceHandler,
-  listDailyBalancesHandler,
+  getDailyBalancesHandler,
 } from '../controllers/dailyBalance.controller';
 import { requireAuth } from '../middlewares/auth.middleware';
 import { validate } from '../middlewares/validate.middleware';
@@ -12,7 +11,7 @@ import {
   closeDailyBalanceSchema,
   createDailyBalanceSchema,
   dailyBalanceIdParamSchema,
-  listDailyBalancesQuerySchema,
+  getDailyBalancesQuerySchema,
 } from '../validations/dailyBalance.validation';
 
 const router = Router();
@@ -42,20 +41,13 @@ router.patch(
   closeDailyBalanceHandler,
 );
 
-// List all daily balances for the authenticated user (optional filtering).
+// Query a daily balance by date (?date=YYYY-MM-DD) or list the authenticated
+// user's balances (with optional startDate/endDate/page/limit filters).
 router.get(
   '/',
   requireAuth,
-  validate(listDailyBalancesQuerySchema, 'query'),
-  listDailyBalancesHandler,
-);
-
-// Get a single daily balance by ID (ownership enforced).
-router.get(
-  '/:id',
-  requireAuth,
-  validate(dailyBalanceIdParamSchema, 'params'),
-  getDailyBalanceHandler,
+  validate(getDailyBalancesQuerySchema, 'query'),
+  getDailyBalancesHandler,
 );
 
 // Delete a daily balance by ID (ownership enforced).
