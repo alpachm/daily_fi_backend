@@ -289,6 +289,92 @@
           ]
         },
         {
+          "name": "logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Cierra la sesión del usuario autenticado revocando de inmediato todos sus tokens JWT mediante el incremento del `token_version`.\n\n- **Método:** `POST`\n- **Requiere token:** Sí\n- **Header:** `Authorization: Bearer {{token}}`.\n\nÉxito: `200 OK` con `{ \"message\": \"Logged out successfully\" }`."
+          },
+          "response": [
+            {
+              "name": "200 OK — Sesión cerrada",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": "{{base_url}}/auth/logout"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"data\": {\n    \"message\": \"Logged out successfully\"\n  }\n}"
+            },
+            {
+              "name": "401 Unauthorized — Token faltante o inválido",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": "{{base_url}}/auth/logout"
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Authentication required. Provide a valid Bearer token.\"\n}"
+            },
+            {
+              "name": "401 Unauthorized — Token revocado",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": "{{base_url}}/auth/logout"
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Token has been revoked. Please log in again.\"\n}"
+            }
+          ]
+        },
+        {
           "name": "change password",
           "request": {
             "method": "PATCH",

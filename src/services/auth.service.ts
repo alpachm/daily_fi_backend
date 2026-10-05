@@ -45,7 +45,11 @@ export async function loginUser(input: LoginInput): Promise<LoginResult> {
     throw new AppError('Invalid email or password', 401);
   }
 
-  const token = signAccessToken({ sub: String(user.pk_user), email: user.email });
+  const token = signAccessToken({
+    sub: String(user.pk_user),
+    email: user.email,
+    token_version: user.token_version,
+  });
 
   return { token, user: { id: user.pk_user, email: user.email } };
 }

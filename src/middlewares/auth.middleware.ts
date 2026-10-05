@@ -44,6 +44,13 @@ export const requireAuth = async (
       return;
     }
 
+    // Token Versioning: reject tokens whose version no longer matches the one
+    // persisted for the user (e.g. after a logout revoked every prior token).
+    if (payload.token_version !== user.token_version) {
+      next(new AppError('Token has been revoked. Please log in again.', 401));
+      return;
+    }
+
     req.user = { pk_user: user.pk_user, email: user.email };
     next();
   } catch (err) {
