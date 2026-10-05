@@ -17,9 +17,14 @@ function getJwtSecret(): string {
 export interface AccessTokenPayload extends jwt.JwtPayload {
   sub: string;
   email: string;
+  token_version: number;
 }
 
-export function signAccessToken(payload: { sub: string; email: string }): string {
+export function signAccessToken(payload: {
+  sub: string;
+  email: string;
+  token_version: number;
+}): string {
   const expiresIn = (process.env.JWT_EXPIRES_IN ??
     DEFAULT_EXPIRES_IN) as jwt.SignOptions['expiresIn'];
 
