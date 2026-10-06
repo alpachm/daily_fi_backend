@@ -1243,7 +1243,7 @@
                 }
               ]
             },
-            "description": "Devuelve los balances diarios más recientes del usuario autenticado.\n\n- **Método:** `GET`\n- **Requiere token:** Sí\n- **Query opcional:** `limit` (entero positivo; por defecto 14, tope máximo 100; valores inválidos caen al valor por defecto).\n\n> Se obtienen los registros más recientes (ordenados por fecha descendente con un `LIMIT` dinámico) y se devuelven en orden cronológico ascendente para facilitar el trazado de gráficos."
+            "description": "Devuelve los balances diarios más recientes del usuario autenticado.\n\n- **Método:** `GET`\n- **Requiere token:** Sí\n- **Query opcional:** `limit` (entero positivo; por defecto 14, tope máximo 100; valores inválidos caen al valor por defecto).\n\n> Se obtienen los registros más recientes (ordenados por fecha descendente con un `LIMIT` dinámico) y se devuelven en orden cronológico descendente (del más reciente al más antiguo), de modo que `data[0]` corresponde a la fecha más reciente."
           },
           "response": [
             {
