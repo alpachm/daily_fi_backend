@@ -96,3 +96,35 @@ export const getRecentDailyBalancesQuerySchema = z.object({
     .catch(RECENT_DAILY_BALANCES_DEFAULT_LIMIT)
     .transform((limit) => Math.min(limit, RECENT_DAILY_BALANCES_MAX_LIMIT)),
 });
+
+export const MONTHLY_BALANCES_DEFAULT_PAGE = 1;
+export const MONTHLY_BALANCES_DEFAULT_LIMIT = 12;
+
+/**
+ * Query parameters for the GET /daily-balances/monthly endpoint.
+ *
+ * - startDate / endDate (optional): inclusive range (YYYY-MM-DD).
+ * - page (optional): 1-based page number. Falls back to 1 when absent.
+ * - limit (optional): monthly summaries per page. Falls back to 12 when absent
+ *   and is capped at 100 to keep the query bounded.
+ */
+export const getMonthlyBalancesQuerySchema = z
+  .object({
+    startDate: dateOnlySchema.optional(),
+    endDate: dateOnlySchema.optional(),
+    page: z.coerce
+      .number()
+      .int()
+      .min(1, 'Page must be at least 1')
+      .default(MONTHLY_BALANCES_DEFAULT_PAGE),
+    limit: z.coerce
+      .number()
+      .int()
+      .min(1, 'Limit must be at least 1')
+      .max(100, 'Limit must be at most 100')
+      .default(MONTHLY_BALANCES_DEFAULT_LIMIT),
+  })
+  .refine(
+    (data) => !data.startDate || !data.endDate || data.startDate <= data.endDate,
+    { message: 'startDate must be on or before endDate', path: ['startDate'] },
+  );

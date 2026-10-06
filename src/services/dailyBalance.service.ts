@@ -1,9 +1,19 @@
-import { Op, type InferAttributes, type Order, type WhereOptions } from 'sequelize';
+import {
+  col,
+  fn,
+  literal,
+  Op,
+  type InferAttributes,
+  type Order,
+  type WhereOptions,
+} from 'sequelize';
 import type {
   CloseDailyBalanceInput,
   CreateDailyBalanceInput,
   DailyBalanceDTO,
   GetDailyBalancesQuery,
+  GetMonthlyBalancesQuery,
+  MonthlyBalanceSummaryDTO,
 } from '../interfaces/dailyBalance.interface';
 import { DailyBalance } from '../models';
 import { AppError } from '../utils/AppError';
@@ -188,4 +198,88 @@ export async function getDailyBalance(
 export async function deleteDailyBalance(userId: number, id: number): Promise<void> {
   const balance = await findOwnedBalance(userId, id);
   await balance.destroy();
+}
+
+type MonthlyAggregateRow = {
+  year: string | number;
+  month: string | number;
+  totalIncome: string | number | null;
+  totalExpenses: string | number | null;
+};
+
+/**
+ * Derives a deterministic synthetic id for a (year, month) summary.
+ *
+ * A monthly summary aggregates several `daily_balances` rows, so it has no
+ * single primary key of its own. To keep the response stable and unique per
+ * month we build a composite id in `MMYYYY` shape (e.g. October 2026 -> 102026).
+ */
+function buildMonthlySummaryId(year: number, month: number): number {
+  return month * 10000 + year;
+}
+
+/**
+ * Aggregates the authenticated user's daily balances into monthly summaries.
+ *
+ * Records are filtered strictly by the owner (`fk_user = userId`) plus any
+ * optional inclusive `startDate`/`endDate` range, then grouped by year and
+ * month. Each group exposes `totalIncome` (`SUM(total_income)`),
+ * `totalExpenses` (`SUM(total_expenses)`) and `netProfit` (the rounded
+ * difference). Results are ordered newest-first (`ORDER BY year DESC,
+ * month DESC`) and paginated with `page`/`limit`.
+ */
+export async function getMonthlyBalanceSummaries(
+  userId: number,
+  query: GetMonthlyBalancesQuery,
+): Promise<MonthlyBalanceSummaryDTO[]> {
+  const where: WhereOptions<DailyBalanceAttributes> = { fk_user: userId };
+
+  if (query.startDate && query.endDate) {
+    where.date = { [Op.between]: [query.startDate, query.endDate] };
+  } else if (query.startDate) {
+    where.date = { [Op.gte]: query.startDate };
+  } else if (query.endDate) {
+    where.date = { [Op.lte]: query.endDate };
+  }
+
+  const yearExpr = fn('EXTRACT', literal('YEAR FROM "date"'));
+  const monthExpr = fn('EXTRACT', literal('MONTH FROM "date"'));
+
+  const limit = query.limit;
+  const offset = (query.page - 1) * limit;
+
+  const rows = (await DailyBalance.findAll({
+    attributes: [
+      [yearExpr, 'year'],
+      [monthExpr, 'month'],
+      [fn('SUM', col('total_income')), 'totalIncome'],
+      [fn('SUM', col('total_expenses')), 'totalExpenses'],
+    ],
+    where,
+    group: [yearExpr, monthExpr],
+    order: [
+      [yearExpr, 'DESC'],
+      [monthExpr, 'DESC'],
+    ],
+    limit,
+    offset,
+    raw: true,
+  })) as unknown as MonthlyAggregateRow[];
+
+  return rows.map((row) => {
+    const year = Math.round(toNumber(row.year));
+    const month = Math.round(toNumber(row.month));
+    const totalIncome = roundToCents(toNumber(row.totalIncome));
+    const totalExpenses = roundToCents(toNumber(row.totalExpenses));
+
+    return {
+      id: buildMonthlySummaryId(year, month),
+      userId,
+      year,
+      month,
+      totalIncome,
+      totalExpenses,
+      netProfit: roundToCents(totalIncome - totalExpenses),
+    };
+  });
 }

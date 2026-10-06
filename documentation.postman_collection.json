@@ -1289,6 +1289,112 @@
           ]
         },
         {
+          "name": "get monthly balance summaries",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/daily-balances/monthly",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "daily-balances",
+                "monthly"
+              ],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2026-01-01",
+                  "description": "Fecha inicial (YYYY-MM-DD)",
+                  "disabled": true
+                },
+                {
+                  "key": "endDate",
+                  "value": "2026-12-31",
+                  "description": "Fecha final (YYYY-MM-DD)",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Número de página (por defecto 1)",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "12",
+                  "description": "Resúmenes por página (por defecto 12, máx. 100)",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Agrega los balances diarios del usuario autenticado en resúmenes mensuales.\n\n- **Método:** `GET`\n- **Requiere token:** Sí\n- **Query opcional:** `startDate`, `endDate`, `page` (por defecto 1), `limit` (por defecto 12).\n\nCada elemento agrupa los registros por `year` y `month` y calcula `totalIncome` (`SUM(totalIncome)`), `totalExpenses` (`SUM(totalExpenses)`) y `netProfit` (`totalIncome - totalExpenses`). Se ordena por año y mes descendente."
+          },
+          "response": [
+            {
+              "name": "200 OK — Resúmenes mensuales",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/daily-balances/monthly"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"data\": [\n    {\n      \"id\": 102026,\n      \"userId\": 21,\n      \"year\": 2026,\n      \"month\": 10,\n      \"totalIncome\": 1500,\n      \"totalExpenses\": 450,\n      \"netProfit\": 1050\n    }\n  ]\n}"
+            },
+            {
+              "name": "400 Bad Request — Error de validación",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/daily-balances/monthly"
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Validation failed\",\n  \"errors\": [\n    { \"field\": \"startDate\", \"message\": \"startDate must be on or before endDate\" }\n  ]\n}"
+            },
+            {
+              "name": "401 Unauthorized — Token faltante o inválido",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/daily-balances/monthly"
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Authentication required. Provide a valid Bearer token.\"\n}"
+            }
+          ]
+        },
+        {
           "name": "delete daily balance",
           "request": {
             "method": "DELETE",

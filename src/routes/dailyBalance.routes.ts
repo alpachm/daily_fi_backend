@@ -4,6 +4,7 @@ import {
   createDailyBalanceHandler,
   deleteDailyBalanceHandler,
   getDailyBalancesHandler,
+  getMonthlyBalancesHandler,
   getRecentDailyBalancesHandler,
 } from '../controllers/dailyBalance.controller';
 import { requireAuth } from '../middlewares/auth.middleware';
@@ -13,6 +14,7 @@ import {
   createDailyBalanceSchema,
   dailyBalanceIdParamSchema,
   getDailyBalancesQuerySchema,
+  getMonthlyBalancesQuerySchema,
   getRecentDailyBalancesQuerySchema,
 } from '../validations/dailyBalance.validation';
 
@@ -61,6 +63,16 @@ router.get(
   requireAuth,
   validate(getRecentDailyBalancesQuerySchema, 'query'),
   getRecentDailyBalancesHandler,
+);
+
+// Aggregate the authenticated user's daily balances into monthly summaries,
+// grouped by year and month and ordered newest-first. Declared before any
+// `/:id` route so the static segment `monthly` is never captured as a numeric id.
+router.get(
+  '/monthly',
+  requireAuth,
+  validate(getMonthlyBalancesQuerySchema, 'query'),
+  getMonthlyBalancesHandler,
 );
 
 // Delete a daily balance by ID (ownership enforced).
