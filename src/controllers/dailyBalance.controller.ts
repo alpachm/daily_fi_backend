@@ -4,6 +4,7 @@ import type {
   CreateDailyBalanceInput,
   DailyBalanceIdParam,
   GetDailyBalancesQuery,
+  GetMonthlyBalancesQuery,
   GetRecentDailyBalancesQuery,
 } from '../interfaces/dailyBalance.interface';
 import {
@@ -11,6 +12,7 @@ import {
   createDailyBalance,
   deleteDailyBalance,
   getDailyBalance,
+  getMonthlyBalanceSummaries,
   getRecentDailyBalances,
   listDailyBalances,
 } from '../services/dailyBalance.service';
@@ -63,6 +65,14 @@ export const getRecentDailyBalancesHandler = asyncHandler(
     const query = req.query as unknown as GetRecentDailyBalancesQuery;
     const balances = await getRecentDailyBalances(req.user!.pk_user, query.limit);
     res.status(200).json({ status: 'success', data: balances });
+  },
+);
+
+export const getMonthlyBalancesHandler = asyncHandler(
+  async (req: Request, res: Response) => {
+    const query = req.query as unknown as GetMonthlyBalancesQuery;
+    const summaries = await getMonthlyBalanceSummaries(req.user!.pk_user, query);
+    res.status(200).json({ status: 'success', data: summaries });
   },
 );
 
