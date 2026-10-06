@@ -13,6 +13,7 @@ import {
   createDailyBalanceSchema,
   dailyBalanceIdParamSchema,
   getDailyBalancesQuerySchema,
+  getRecentDailyBalancesQuerySchema,
 } from '../validations/dailyBalance.validation';
 
 const router = Router();
@@ -51,10 +52,16 @@ router.get(
   getDailyBalancesHandler,
 );
 
-// Fetch the authenticated user's 14 most recent daily balances (ordered by
-// date DESC and limited to 14). Declared before any `/:id` route so the static
-// segment `recent` is never captured as a numeric id.
-router.get('/recent', requireAuth, getRecentDailyBalancesHandler);
+// Fetch the authenticated user's most recent daily balances (ordered by date
+// DESC, limited to an optional dynamic `limit` — default 14, capped at 100).
+// Declared before any `/:id` route so the static segment `recent` is never
+// captured as a numeric id.
+router.get(
+  '/recent',
+  requireAuth,
+  validate(getRecentDailyBalancesQuerySchema, 'query'),
+  getRecentDailyBalancesHandler,
+);
 
 // Delete a daily balance by ID (ownership enforced).
 router.delete(

@@ -1226,16 +1226,24 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/daily-balances/recent",
+              "raw": "{{base_url}}/daily-balances/recent?limit=100",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "daily-balances",
                 "recent"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "14",
+                  "description": "Cantidad máxima de registros (por defecto 14, máx. 100)",
+                  "disabled": true
+                }
               ]
             },
-            "description": "Devuelve los últimos 14 balances diarios del usuario autenticado.\n\n- **Método:** `GET`\n- **Requiere token:** Sí\n\n> Se obtienen los 14 registros más recientes (ordenados por fecha descendente con límite estricto de 14) y se devuelven en orden cronológico ascendente para facilitar el trazado de gráficos."
+            "description": "Devuelve los balances diarios más recientes del usuario autenticado.\n\n- **Método:** `GET`\n- **Requiere token:** Sí\n- **Query opcional:** `limit` (entero positivo; por defecto 14, tope máximo 100; valores inválidos caen al valor por defecto).\n\n> Se obtienen los registros más recientes (ordenados por fecha descendente con un `LIMIT` dinámico) y se devuelven en orden cronológico ascendente para facilitar el trazado de gráficos."
           },
           "response": [
             {

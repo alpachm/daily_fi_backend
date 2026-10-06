@@ -76,3 +76,23 @@ export const getDailyBalancesQuerySchema = z
     (data) => !data.startDate || !data.endDate || data.startDate <= data.endDate,
     { message: 'startDate must be on or before endDate', path: ['startDate'] },
   );
+
+export const RECENT_DAILY_BALANCES_DEFAULT_LIMIT = 14;
+export const RECENT_DAILY_BALANCES_MAX_LIMIT = 100;
+
+/**
+ * Query parameters for the GET /daily-balances/recent endpoint.
+ *
+ * - limit (optional): maximum number of records to return. Falls back to 14
+ *   when absent or invalid (non-numeric, non-integer or <= 0) and is capped at
+ *   100 to prevent database overload. Invalid values never surface as a 400/500:
+ *   they are coerced back to the default limit instead.
+ */
+export const getRecentDailyBalancesQuerySchema = z.object({
+  limit: z.coerce
+    .number()
+    .int()
+    .positive()
+    .catch(RECENT_DAILY_BALANCES_DEFAULT_LIMIT)
+    .transform((limit) => Math.min(limit, RECENT_DAILY_BALANCES_MAX_LIMIT)),
+});

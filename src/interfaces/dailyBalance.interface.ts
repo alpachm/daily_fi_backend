@@ -4,12 +4,16 @@ import {
   createDailyBalanceSchema,
   dailyBalanceIdParamSchema,
   getDailyBalancesQuerySchema,
+  getRecentDailyBalancesQuerySchema,
 } from '../validations/dailyBalance.validation';
 
 export type CreateDailyBalanceInput = z.infer<typeof createDailyBalanceSchema>;
 export type CloseDailyBalanceInput = z.infer<typeof closeDailyBalanceSchema>;
 export type DailyBalanceIdParam = z.infer<typeof dailyBalanceIdParamSchema>;
 export type GetDailyBalancesQuery = z.infer<typeof getDailyBalancesQuerySchema>;
+export type GetRecentDailyBalancesQuery = z.infer<
+  typeof getRecentDailyBalancesQuerySchema
+>;
 
 /**
  * Serialized representation returned to API consumers. Maps the snake_case
