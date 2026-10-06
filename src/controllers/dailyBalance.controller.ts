@@ -6,6 +6,7 @@ import type {
   GetDailyBalancesQuery,
   GetMonthlyBalancesQuery,
   GetRecentDailyBalancesQuery,
+  GetYearlyBalancesQuery,
 } from '../interfaces/dailyBalance.interface';
 import {
   closeDailyBalance,
@@ -14,6 +15,7 @@ import {
   getDailyBalance,
   getMonthlyBalanceSummaries,
   getRecentDailyBalances,
+  getYearlyBalanceSummaries,
   listDailyBalances,
 } from '../services/dailyBalance.service';
 import { asyncHandler } from '../utils/asyncHandler';
@@ -72,6 +74,14 @@ export const getMonthlyBalancesHandler = asyncHandler(
   async (req: Request, res: Response) => {
     const query = req.query as unknown as GetMonthlyBalancesQuery;
     const summaries = await getMonthlyBalanceSummaries(req.user!.pk_user, query);
+    res.status(200).json({ status: 'success', data: summaries });
+  },
+);
+
+export const getYearlyBalancesHandler = asyncHandler(
+  async (req: Request, res: Response) => {
+    const query = req.query as unknown as GetYearlyBalancesQuery;
+    const summaries = await getYearlyBalanceSummaries(req.user!.pk_user, query);
     res.status(200).json({ status: 'success', data: summaries });
   },
 );

@@ -128,3 +128,27 @@ export const getMonthlyBalancesQuerySchema = z
     (data) => !data.startDate || !data.endDate || data.startDate <= data.endDate,
     { message: 'startDate must be on or before endDate', path: ['startDate'] },
   );
+
+export const YEARLY_BALANCES_DEFAULT_PAGE = 1;
+export const YEARLY_BALANCES_DEFAULT_LIMIT = 10;
+
+/**
+ * Query parameters for the GET /daily-balances/yearly endpoint.
+ *
+ * - page (optional): 1-based page number. Falls back to 1 when absent.
+ * - limit (optional): yearly summaries per page. Falls back to 10 when absent
+ *   and is capped at 100 to keep the query bounded.
+ */
+export const getYearlyBalancesQuerySchema = z.object({
+  page: z.coerce
+    .number()
+    .int()
+    .min(1, 'Page must be at least 1')
+    .default(YEARLY_BALANCES_DEFAULT_PAGE),
+  limit: z.coerce
+    .number()
+    .int()
+    .min(1, 'Limit must be at least 1')
+    .max(100, 'Limit must be at most 100')
+    .default(YEARLY_BALANCES_DEFAULT_LIMIT),
+});

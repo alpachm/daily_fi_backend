@@ -13,7 +13,9 @@ import type {
   DailyBalanceDTO,
   GetDailyBalancesQuery,
   GetMonthlyBalancesQuery,
+  GetYearlyBalancesQuery,
   MonthlyBalanceSummaryDTO,
+  YearlyBalanceSummaryDTO,
 } from '../interfaces/dailyBalance.interface';
 import { DailyBalance } from '../models';
 import { AppError } from '../utils/AppError';
@@ -277,6 +279,62 @@ export async function getMonthlyBalanceSummaries(
       userId,
       year,
       month,
+      totalIncome,
+      totalExpenses,
+      netProfit: roundToCents(totalIncome - totalExpenses),
+    };
+  });
+}
+
+type YearlyAggregateRow = {
+  year: string | number;
+  totalIncome: string | number | null;
+  totalExpenses: string | number | null;
+};
+
+/**
+ * Aggregates the authenticated user's daily balances into yearly summaries.
+ *
+ * Records are filtered strictly by the owner (`fk_user = userId`), grouped by
+ * year, and each group exposes `totalIncome` (`SUM(total_income)`),
+ * `totalExpenses` (`SUM(total_expenses)`) and `netProfit` (the rounded
+ * difference). Results are ordered newest-first (`ORDER BY year DESC`) and
+ * paginated with `page`/`limit`.
+ */
+export async function getYearlyBalanceSummaries(
+  userId: number,
+  query: GetYearlyBalancesQuery,
+): Promise<YearlyBalanceSummaryDTO[]> {
+  const where: WhereOptions<DailyBalanceAttributes> = { fk_user: userId };
+
+  const yearExpr = fn('EXTRACT', literal('YEAR FROM "date"'));
+
+  const limit = query.limit;
+  const offset = (query.page - 1) * limit;
+
+  const rows = (await DailyBalance.findAll({
+    attributes: [
+      [yearExpr, 'year'],
+      [fn('SUM', col('total_income')), 'totalIncome'],
+      [fn('SUM', col('total_expenses')), 'totalExpenses'],
+    ],
+    where,
+    group: [yearExpr],
+    order: [[yearExpr, 'DESC']],
+    limit,
+    offset,
+    raw: true,
+  })) as unknown as YearlyAggregateRow[];
+
+  return rows.map((row) => {
+    const year = Math.round(toNumber(row.year));
+    const totalIncome = roundToCents(toNumber(row.totalIncome));
+    const totalExpenses = roundToCents(toNumber(row.totalExpenses));
+
+    return {
+      id: year,
+      userId,
+      year,
       totalIncome,
       totalExpenses,
       netProfit: roundToCents(totalIncome - totalExpenses),

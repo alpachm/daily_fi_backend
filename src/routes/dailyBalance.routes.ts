@@ -6,6 +6,7 @@ import {
   getDailyBalancesHandler,
   getMonthlyBalancesHandler,
   getRecentDailyBalancesHandler,
+  getYearlyBalancesHandler,
 } from '../controllers/dailyBalance.controller';
 import { requireAuth } from '../middlewares/auth.middleware';
 import { validate } from '../middlewares/validate.middleware';
@@ -16,6 +17,7 @@ import {
   getDailyBalancesQuerySchema,
   getMonthlyBalancesQuerySchema,
   getRecentDailyBalancesQuerySchema,
+  getYearlyBalancesQuerySchema,
 } from '../validations/dailyBalance.validation';
 
 const router = Router();
@@ -73,6 +75,16 @@ router.get(
   requireAuth,
   validate(getMonthlyBalancesQuerySchema, 'query'),
   getMonthlyBalancesHandler,
+);
+
+// Aggregate the authenticated user's daily balances into yearly summaries,
+// grouped by year and ordered newest-first. Declared before any `/:id` route
+// so the static segment `yearly` is never captured as a numeric id.
+router.get(
+  '/yearly',
+  requireAuth,
+  validate(getYearlyBalancesQuerySchema, 'query'),
+  getYearlyBalancesHandler,
 );
 
 // Delete a daily balance by ID (ownership enforced).
