@@ -4,6 +4,7 @@ import type {
   CreateDailyBalanceInput,
   DailyBalanceIdParam,
   GetDailyBalancesQuery,
+  GetRecentDailyBalancesQuery,
 } from '../interfaces/dailyBalance.interface';
 import {
   closeDailyBalance,
@@ -59,7 +60,8 @@ export const getDailyBalancesHandler = asyncHandler(
 
 export const getRecentDailyBalancesHandler = asyncHandler(
   async (req: Request, res: Response) => {
-    const balances = await getRecentDailyBalances(req.user!.pk_user);
+    const query = req.query as unknown as GetRecentDailyBalancesQuery;
+    const balances = await getRecentDailyBalances(req.user!.pk_user, query.limit);
     res.status(200).json({ status: 'success', data: balances });
   },
 );
