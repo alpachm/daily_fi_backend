@@ -4,6 +4,7 @@ import {
   createDailyBalanceHandler,
   deleteDailyBalanceHandler,
   getDailyBalancesHandler,
+  getRecentDailyBalancesHandler,
 } from '../controllers/dailyBalance.controller';
 import { requireAuth } from '../middlewares/auth.middleware';
 import { validate } from '../middlewares/validate.middleware';
@@ -49,6 +50,11 @@ router.get(
   validate(getDailyBalancesQuerySchema, 'query'),
   getDailyBalancesHandler,
 );
+
+// Fetch the authenticated user's 14 most recent daily balances (ordered by
+// date DESC and limited to 14). Declared before any `/:id` route so the static
+// segment `recent` is never captured as a numeric id.
+router.get('/recent', requireAuth, getRecentDailyBalancesHandler);
 
 // Delete a daily balance by ID (ownership enforced).
 router.delete(
