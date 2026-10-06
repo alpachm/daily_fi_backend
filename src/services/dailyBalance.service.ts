@@ -117,8 +117,8 @@ export async function listDailyBalances(
   }
 
   const order: Order = [
-    ['date', 'ASC'],
-    ['pk_daily_balance', 'ASC'],
+    ['date', 'DESC'],
+    ['pk_daily_balance', 'DESC'],
   ];
 
   // Always bound the query: fall back to a hard default page size of 100 when
@@ -140,11 +140,12 @@ export async function listDailyBalances(
  * Returns the authenticated user's most recent daily balances.
  *
  * Unlike `listDailyBalances`, this query is NOT date-range based: it orders the
- * user's records by `date` descending and applies a dynamic `LIMIT` (already
- * validated/capped by the controller's query schema, defaulting to 14 and never
- * exceeding 100), so it always returns the latest records regardless of how far
- * back they go. The fetched subset is then re-sorted ascending so the payload
- * reads chronologically for charting/display, matching the existing list endpoint.
+ * user's records by `date` descending (with `pk_daily_balance` as a deterministic
+ * tie-breaker) and applies a dynamic `LIMIT` (already validated/capped by the
+ * controller's query schema, defaulting to 14 and never exceeding 100), so it
+ * always returns the latest records regardless of how far back they go. The
+ * result is returned newest-first (`data[0]` is the most recent date), matching
+ * the ordering of the list endpoint.
  */
 export async function getRecentDailyBalances(
   userId: number,
@@ -161,14 +162,7 @@ export async function getRecentDailyBalances(
     limit,
   });
 
-  return balances
-    .sort((a, b) => {
-      if (a.date === b.date) {
-        return a.pk_daily_balance - b.pk_daily_balance;
-      }
-      return a.date < b.date ? -1 : 1;
-    })
-    .map(toDTO);
+  return balances.map(toDTO);
 }
 
 export async function getDailyBalance(
