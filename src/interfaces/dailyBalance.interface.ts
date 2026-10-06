@@ -6,6 +6,7 @@ import {
   getDailyBalancesQuerySchema,
   getMonthlyBalancesQuerySchema,
   getRecentDailyBalancesQuerySchema,
+  getYearlyBalancesQuerySchema,
 } from '../validations/dailyBalance.validation';
 
 export type CreateDailyBalanceInput = z.infer<typeof createDailyBalanceSchema>;
@@ -16,6 +17,7 @@ export type GetMonthlyBalancesQuery = z.infer<typeof getMonthlyBalancesQuerySche
 export type GetRecentDailyBalancesQuery = z.infer<
   typeof getRecentDailyBalancesQuerySchema
 >;
+export type GetYearlyBalancesQuery = z.infer<typeof getYearlyBalancesQuerySchema>;
 
 /**
  * Serialized representation returned to API consumers. Maps the snake_case
@@ -46,6 +48,22 @@ export interface MonthlyBalanceSummaryDTO {
   userId: number;
   year: number;
   month: number;
+  totalIncome: number;
+  totalExpenses: number;
+  netProfit: number;
+}
+
+/**
+ * Serialized yearly summary returned by `GET /daily-balances/yearly`.
+ *
+ * Aggregates many `daily_balances` rows for a single year. Since a summary has
+ * no primary key of its own, `id` is the aggregated year itself (e.g. 2026),
+ * which is unique per user and keeps the response stable.
+ */
+export interface YearlyBalanceSummaryDTO {
+  id: number;
+  userId: number;
+  year: number;
   totalIncome: number;
   totalExpenses: number;
   netProfit: number;

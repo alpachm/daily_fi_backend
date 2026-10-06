@@ -1395,6 +1395,100 @@
           ]
         },
         {
+          "name": "get yearly balance summaries",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/daily-balances/yearly",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "daily-balances",
+                "yearly"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Número de página (por defecto 1)",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Resúmenes por página (por defecto 10, máx. 100)",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Agrega los balances diarios del usuario autenticado en resúmenes anuales.\n\n- **Método:** `GET`\n- **Requiere token:** Sí\n- **Query opcional:** `page` (por defecto 1), `limit` (por defecto 10).\n\nCada elemento agrupa los registros por `year` y calcula `totalIncome` (`SUM(totalIncome)`), `totalExpenses` (`SUM(totalExpenses)`) y `netProfit` (`totalIncome - totalExpenses`). Se ordena por año descendente."
+          },
+          "response": [
+            {
+              "name": "200 OK — Resúmenes anuales",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/daily-balances/yearly"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"data\": [\n    {\n      \"id\": 2026,\n      \"userId\": 21,\n      \"year\": 2026,\n      \"totalIncome\": 18500,\n      \"totalExpenses\": 5200,\n      \"netProfit\": 13300\n    }\n  ]\n}"
+            },
+            {
+              "name": "400 Bad Request — Error de validación",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/daily-balances/yearly"
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Validation failed\",\n  \"errors\": [\n    { \"field\": \"limit\", \"message\": \"Limit must be at most 100\" }\n  ]\n}"
+            },
+            {
+              "name": "401 Unauthorized — Token faltante o inválido",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/daily-balances/yearly"
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Authentication required. Provide a valid Bearer token.\"\n}"
+            }
+          ]
+        },
+        {
           "name": "delete daily balance",
           "request": {
             "method": "DELETE",
