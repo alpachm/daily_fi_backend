@@ -136,6 +136,41 @@ export async function listDailyBalances(
   return balances.map(toDTO);
 }
 
+export const RECENT_DAILY_BALANCES_LIMIT = 14;
+
+/**
+ * Returns the authenticated user's 14 most recent daily balances.
+ *
+ * Unlike `listDailyBalances`, this query is NOT date-range based: it orders the
+ * user's records by `date` descending and applies a strict `LIMIT 14`, so it
+ * always returns the latest 14 records regardless of how far back they go.
+ * The fetched subset is then re-sorted ascending so the payload reads
+ * chronologically for charting/display, matching the existing list endpoint.
+ */
+export async function getRecentDailyBalances(
+  userId: number,
+): Promise<DailyBalanceDTO[]> {
+  const order: Order = [
+    ['date', 'DESC'],
+    ['pk_daily_balance', 'DESC'],
+  ];
+
+  const balances = await DailyBalance.findAll({
+    where: { fk_user: userId },
+    order,
+    limit: RECENT_DAILY_BALANCES_LIMIT,
+  });
+
+  return balances
+    .sort((a, b) => {
+      if (a.date === b.date) {
+        return a.pk_daily_balance - b.pk_daily_balance;
+      }
+      return a.date < b.date ? -1 : 1;
+    })
+    .map(toDTO);
+}
+
 export async function getDailyBalance(
   userId: number,
   date: string,

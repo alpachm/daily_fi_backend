@@ -10,6 +10,7 @@ import {
   createDailyBalance,
   deleteDailyBalance,
   getDailyBalance,
+  getRecentDailyBalances,
   listDailyBalances,
 } from '../services/dailyBalance.service';
 import { asyncHandler } from '../utils/asyncHandler';
@@ -52,6 +53,13 @@ export const getDailyBalancesHandler = asyncHandler(
     }
 
     const balances = await listDailyBalances(req.user!.pk_user, query);
+    res.status(200).json({ status: 'success', data: balances });
+  },
+);
+
+export const getRecentDailyBalancesHandler = asyncHandler(
+  async (req: Request, res: Response) => {
+    const balances = await getRecentDailyBalances(req.user!.pk_user);
     res.status(200).json({ status: 'success', data: balances });
   },
 );

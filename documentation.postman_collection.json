@@ -1221,6 +1221,66 @@
           ]
         },
         {
+          "name": "get recent daily balances",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/daily-balances/recent",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "daily-balances",
+                "recent"
+              ]
+            },
+            "description": "Devuelve los últimos 14 balances diarios del usuario autenticado.\n\n- **Método:** `GET`\n- **Requiere token:** Sí\n\n> Se obtienen los 14 registros más recientes (ordenados por fecha descendente con límite estricto de 14) y se devuelven en orden cronológico ascendente para facilitar el trazado de gráficos."
+          },
+          "response": [
+            {
+              "name": "200 OK — Últimos 14 balances",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/daily-balances/recent"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"data\": [\n    {\n      \"id\": 1,\n      \"userId\": 1,\n      \"date\": \"2026-09-23\",\n      \"openingBalance\": 900,\n      \"closingBalance\": 1200,\n      \"totalIncome\": 300,\n      \"totalExpenses\": 0,\n      \"notes\": null,\n      \"createdAt\": \"2026-09-23T09:00:00.000Z\",\n      \"updatedAt\": \"2026-09-23T18:00:00.000Z\"\n    }\n  ]\n}"
+            },
+            {
+              "name": "401 Unauthorized — Token faltante o inválido",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/daily-balances/recent"
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Authentication required. Provide a valid Bearer token.\"\n}"
+            }
+          ]
+        },
+        {
           "name": "delete daily balance",
           "request": {
             "method": "DELETE",
