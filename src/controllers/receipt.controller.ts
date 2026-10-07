@@ -58,6 +58,7 @@ export const getReceiptsByDayHandler = asyncHandler(
 
     const data: GetReceiptsByDayResponse = {
       date: query.date,
+      ...(query.type ? { type: query.type } : {}),
       receipts,
       pagination,
     };
