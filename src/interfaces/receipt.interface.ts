@@ -3,13 +3,13 @@ import { z } from 'zod';
 import { ReceiptType } from '../enums/receiptType';
 import {
   createReceiptsSchema,
+  getReceiptsByDayQuerySchema,
   receiptIdParamSchema,
-  receiptsByDailyBalanceParamSchema,
 } from '../validations/receipt.validation';
 
 export type CreateReceiptsInput = z.infer<typeof createReceiptsSchema>;
 export type ReceiptIdParam = z.infer<typeof receiptIdParamSchema>;
-export type ReceiptsByDailyBalanceParam = z.infer<typeof receiptsByDailyBalanceParamSchema>;
+export type GetReceiptsByDayQuery = z.infer<typeof getReceiptsByDayQuerySchema>;
 
 /**
  * Serialized representation returned to API consumers. Maps the snake_case

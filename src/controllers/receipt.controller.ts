@@ -2,13 +2,13 @@ import { type Request, type Response } from 'express';
 
 import type {
   CreateReceiptsInput,
+  GetReceiptsByDayQuery,
   ReceiptIdParam,
-  ReceiptsByDailyBalanceParam,
 } from '../interfaces/receipt.interface';
 import {
   deleteReceipt,
   getReceiptDownloadUrl,
-  getReceiptsByDailyBalance,
+  getReceiptsByDay,
   uploadReceipts,
 } from '../services/receipt.service';
 import { AppError } from '../utils/AppError';
@@ -41,10 +41,14 @@ export const uploadReceiptsHandler = asyncHandler(
 
 export const getReceiptsByDayHandler = asyncHandler(
   async (req: Request, res: Response) => {
-    const { dailyBalanceId } = req.params as unknown as ReceiptsByDailyBalanceParam;
-    const receipts = await getReceiptsByDailyBalance(req.user!.pk_user, dailyBalanceId);
+    const { date } = req.query as unknown as GetReceiptsByDayQuery;
+    const receipts = await getReceiptsByDay(req.user!.pk_user, date);
 
-    res.status(200).json({ status: 'success', data: receipts });
+    res.status(200).json({
+      status: 'success',
+      message: 'Receipts retrieved successfully',
+      data: { date, count: receipts.length, receipts },
+    });
   },
 );
 

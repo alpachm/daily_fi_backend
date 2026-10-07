@@ -1757,29 +1757,28 @@
           ]
         },
         {
-          "name": "get receipts per daily balance",
+          "name": "get receipts per day",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/receipts/daily-balance/:dailyBalanceId",
+              "raw": "{{base_url}}/receipts/day?date=2026-10-07",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "receipts",
-                "daily-balance",
-                ":dailyBalanceId"
+                "day"
               ],
-              "variable": [
+              "query": [
                 {
-                  "key": "dailyBalanceId",
-                  "value": "1",
-                  "description": "ID del balance diario"
+                  "key": "date",
+                  "value": "2026-10-07",
+                  "description": "Día en formato YYYY-MM-DD"
                 }
               ]
             },
-            "description": "Lista los comprobantes asociados a un balance diario específico.\n\n- **Método:** `GET`\n- **Requiere token:** Sí\n- **Parámetro de ruta:** `dailyBalanceId` (integer).\n\n> Cada comprobante incluye una `fileUrl` temporal (URL firmada) generada al momento."
+            "description": "Lista los comprobantes del día indicado.\n\n- **Método:** `GET`\n- **Requiere token:** Sí\n- **Parámetro de query:** `date` (YYYY-MM-DD, obligatorio).\n\n> Cada comprobante incluye una `fileUrl` temporal (URL firmada) generada al momento. Si no hay comprobantes para esa fecha, devuelve un arreglo vacío."
           },
           "response": [
             {
@@ -1787,7 +1786,7 @@
               "originalRequest": {
                 "method": "GET",
                 "header": [],
-                "url": "{{base_url}}/receipts/daily-balance/:dailyBalanceId"
+                "url": "{{base_url}}/receipts/day?date=2026-10-07"
               },
               "status": "OK",
               "code": 200,
@@ -1800,14 +1799,34 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"status\": \"success\",\n  \"data\": [\n    {\n      \"id\": 1,\n      \"userId\": 1,\n      \"dailyBalanceId\": 1,\n      \"fileUrl\": \"https://<bucket>.r2.cloudflarestorage.com/...?X-Amz-Signature=...\",\n      \"type\": \"PURCHASE\",\n      \"date\": \"2026-10-04\",\n      \"description\": \"Compra de insumos\",\n      \"category\": \"Insumos\",\n      \"createdAt\": \"2026-10-04T10:00:00.000Z\",\n      \"updatedAt\": \"2026-10-04T10:00:00.000Z\"\n    }\n  ]\n}"
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Receipts retrieved successfully\",\n  \"data\": {\n    \"date\": \"2026-10-07\",\n    \"count\": 2,\n    \"receipts\": [\n      {\n        \"id\": 1,\n        \"userId\": 1,\n        \"dailyBalanceId\": 1,\n        \"fileUrl\": \"https://<bucket>.r2.cloudflarestorage.com/...?X-Amz-Signature=...\",\n        \"type\": \"PURCHASE\",\n        \"date\": \"2026-10-07\",\n        \"description\": \"Compra de insumos\",\n        \"category\": \"Insumos\",\n        \"createdAt\": \"2026-10-07T10:00:00.000Z\",\n        \"updatedAt\": \"2026-10-07T10:00:00.000Z\"\n      }\n    ]\n  }\n}"
+            },
+            {
+              "name": "400 Bad Request — Fecha inválida",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/receipts/day?date=invalid-date"
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Validation failed\",\n  \"errors\": [\n    {\n      \"field\": \"date\",\n      \"message\": \"A valid date (YYYY-MM-DD) is required\"\n    }\n  ]\n}"
             },
             {
               "name": "401 Unauthorized — Token faltante o inválido",
               "originalRequest": {
                 "method": "GET",
                 "header": [],
-                "url": "{{base_url}}/receipts/daily-balance/:dailyBalanceId"
+                "url": "{{base_url}}/receipts/day?date=2026-10-07"
               },
               "status": "Unauthorized",
               "code": 401,
@@ -1821,46 +1840,6 @@
               ],
               "cookie": [],
               "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Authentication required. Provide a valid Bearer token.\"\n}"
-            },
-            {
-              "name": "403 Forbidden — No autorizado",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": "{{base_url}}/receipts/daily-balance/:dailyBalanceId"
-              },
-              "status": "Forbidden",
-              "code": 403,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json",
-                  "type": "text"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"You are not authorized to access this daily balance\"\n}"
-            },
-            {
-              "name": "404 Not Found — Balance no encontrado",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": "{{base_url}}/receipts/daily-balance/:dailyBalanceId"
-              },
-              "status": "Not Found",
-              "code": 404,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json",
-                  "type": "text"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Daily balance not found\"\n}"
             }
           ]
         },
