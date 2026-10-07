@@ -73,7 +73,11 @@ export const errorHandler = (
 
   // Operational errors with a safe message and explicit status code.
   if (err instanceof AppError) {
-    res.status(err.statusCode).json({ status: 'fail', message: err.message });
+    res.status(err.statusCode).json({
+      status: 'fail',
+      message: err.message,
+      ...(err.errors ? { errors: err.errors } : {}),
+    });
     return;
   }
 

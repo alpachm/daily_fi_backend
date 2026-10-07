@@ -1590,10 +1590,10 @@
               "mode": "formdata",
               "formdata": [
                 {
-                  "key": "fk_daily_balance",
-                  "value": "1",
+                  "key": "date",
+                  "value": "2026-10-04",
                   "type": "text",
-                  "description": "ID del balance diario"
+                  "description": "Fecha del balance diario (YYYY-MM-DD). Debe existir un balance diario para esta fecha."
                 },
                 {
                   "key": "description",
@@ -1631,7 +1631,7 @@
                 "bulk"
               ]
             },
-            "description": "Sube uno o más comprobantes contra un balance diario.\n\n- **Método:** `POST`\n- **Requiere token:** Sí\n- **Content-Type:** `multipart/form-data`\n- **Campos:** `receipts` (archivo, obligatorio), `fk_daily_balance` (obligatorio), `description`, `category`, `type` (opcionales).\n\n## Formatos permitidos\nJPEG, PNG, WebP y PDF (máx. 10 MB por archivo)."
+            "description": "Sube uno o más comprobantes contra un balance diario.\n\n- **Método:** `POST`\n- **Requiere token:** Sí\n- **Content-Type:** `multipart/form-data`\n- **Campos:** `receipts` (archivo, obligatorio), `date` (obligatorio, YYYY-MM-DD), `description`, `category`, `type` (opcionales).\n\n> Requiere que ya exista un balance diario para la fecha indicada; de lo contrario se devuelve `404 Not Found`.\n\n## Formatos permitidos\nJPEG, PNG, WebP y PDF (máx. 10 MB por archivo)."
           },
           "response": [
             {
@@ -1672,7 +1672,27 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Validation failed\",\n  \"errors\": [\n    { \"field\": \"fk_daily_balance\", \"message\": \"Daily balance ID must be a positive integer\" }\n  ]\n}"
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Validation failed\",\n  \"errors\": [\n    { \"field\": \"date\", \"message\": \"A valid date (YYYY-MM-DD) is required\" }\n  ]\n}"
+            },
+            {
+              "name": "404 Not Found — Balance diario inexistente",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": "{{base_url}}/receipts/bulk"
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"No daily balance record found for the provided date. Please create a daily balance entry before uploading receipts.\",\n  \"errors\": [\n    { \"field\": \"date\", \"message\": \"Daily balance record does not exist for this date\" }\n  ]\n}"
             },
             {
               "name": "400 Bad Request — Sin archivos",

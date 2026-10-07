@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { ReceiptType } from '../enums/receiptType';
+import { isValidCalendarDate } from './dailyBalance.validation';
 
 /**
  * Shared positive-integer coercion used for numeric path/body identifiers.
@@ -11,15 +12,29 @@ const positiveIntSchema = (label: string) =>
     .int(`${label} must be an integer`)
     .positive(`${label} must be a positive integer`);
 
+const RECEIPT_DATE_REQUIRED_MESSAGE = 'A valid date (YYYY-MM-DD) is required';
+
+/**
+ * Calendar date the uploaded receipts belong to (`YYYY-MM-DD`). Unlike the
+ * create-balance request, a receipt can never fall back to a default day: it
+ * must always resolve to a concrete date, so missing, malformed or impossible
+ * values all fail with the same clear message.
+ */
+export const receiptDateSchema = z
+  .string({ error: RECEIPT_DATE_REQUIRED_MESSAGE })
+  .trim()
+  .refine(isValidCalendarDate, RECEIPT_DATE_REQUIRED_MESSAGE);
+
 /**
  * Validates the multipart form fields required to upload one or more receipts.
  *
- * - `fk_daily_balance` arrives as a form text field, hence the number coercion.
+ * - `date` identifies the daily balance the receipts belong to; the service
+ *   resolves (or auto-creates) that balance by (userId, date).
  * - `type` defaults to `PURCHASE` when omitted (a receipt is a proof of purchase
  *   by default); send `SALE` to record a sale receipt.
  */
 export const createReceiptsSchema = z.object({
-  fk_daily_balance: positiveIntSchema('Daily balance ID'),
+  date: receiptDateSchema,
   description: z
     .string()
     .trim()
