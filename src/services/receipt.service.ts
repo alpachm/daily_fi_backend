@@ -2,7 +2,11 @@ import { type Order } from 'sequelize';
 import { extname } from 'node:path';
 
 import { sequelize } from '../database';
-import type { CreateReceiptsInput, ReceiptDTO } from '../interfaces/receipt.interface';
+import type {
+  CreateReceiptsInput,
+  GetReceiptsByDayQuery,
+  ReceiptDTO,
+} from '../interfaces/receipt.interface';
 import { DailyBalance, Receipt } from '../models';
 import { AppError } from '../utils/AppError';
 import {
@@ -150,26 +154,35 @@ export async function uploadReceipts(
 }
 
 /**
- * Returns every receipt for the given calendar day (ownership enforced through
- * the `fk_user` column). Receipts are matched directly against the `date`
- * column, so no daily-balance record is required; when no receipts exist for
- * that day an empty array is returned.
+ * Returns the receipts for the given calendar day (ownership enforced through
+ * the `fk_user` column) as a paginated page, plus the total number of matching
+ * receipts so the caller can build pagination metadata. Receipts are matched
+ * directly against the `date` column, so no daily-balance record is required;
+ * when no receipts exist for that day an empty array and a zero total are
+ * returned.
  */
 export async function getReceiptsByDay(
   userId: number,
-  date: string,
-): Promise<ReceiptDTO[]> {
+  query: GetReceiptsByDayQuery,
+): Promise<{ receipts: ReceiptDTO[]; totalItems: number }> {
+  const where = { date: query.date, fk_user: userId };
+  const limit = query.limit;
+  const offset = (query.page - 1) * limit;
+
   const order: Order = [
-    ['created_at', 'ASC'],
-    ['pk_receipts', 'ASC'],
+    ['created_at', 'DESC'],
+    ['pk_receipts', 'DESC'],
   ];
 
-  const receipts = await Receipt.findAll({
-    where: { date, fk_user: userId },
-    order,
-  });
+  const [totalItems, receipts] = await Promise.all([
+    Receipt.count({ where }),
+    Receipt.findAll({ where, order, limit, offset }),
+  ]);
 
-  return Promise.all(receipts.map(toDTO));
+  return {
+    receipts: await Promise.all(receipts.map(toDTO)),
+    totalItems,
+  };
 }
 
 /**

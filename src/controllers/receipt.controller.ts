@@ -3,6 +3,8 @@ import { type Request, type Response } from 'express';
 import type {
   CreateReceiptsInput,
   GetReceiptsByDayQuery,
+  GetReceiptsByDayResponse,
+  PaginationMeta,
   ReceiptIdParam,
 } from '../interfaces/receipt.interface';
 import {
@@ -41,13 +43,29 @@ export const uploadReceiptsHandler = asyncHandler(
 
 export const getReceiptsByDayHandler = asyncHandler(
   async (req: Request, res: Response) => {
-    const { date } = req.query as unknown as GetReceiptsByDayQuery;
-    const receipts = await getReceiptsByDay(req.user!.pk_user, date);
+    const query = req.query as unknown as GetReceiptsByDayQuery;
+    const { receipts, totalItems } = await getReceiptsByDay(req.user!.pk_user, query);
+
+    const totalPages = Math.ceil(totalItems / query.limit);
+    const pagination: PaginationMeta = {
+      totalItems,
+      totalPages,
+      currentPage: query.page,
+      itemsPerPage: query.limit,
+      hasNextPage: query.page < totalPages,
+      hasPrevPage: query.page > 1,
+    };
+
+    const data: GetReceiptsByDayResponse = {
+      date: query.date,
+      receipts,
+      pagination,
+    };
 
     res.status(200).json({
       status: 'success',
       message: 'Receipts retrieved successfully',
-      data: { date, count: receipts.length, receipts },
+      data,
     });
   },
 );
