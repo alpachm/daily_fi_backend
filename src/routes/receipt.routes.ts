@@ -11,8 +11,8 @@ import { uploadMultipleReceipts } from '../middlewares/upload';
 import { validate } from '../middlewares/validate.middleware';
 import {
   createReceiptsSchema,
+  getReceiptsByDayQuerySchema,
   receiptIdParamSchema,
-  receiptsByDailyBalanceParamSchema,
 } from '../validations/receipt.validation';
 
 const router = Router();
@@ -26,11 +26,11 @@ router.post(
   uploadReceiptsHandler,
 );
 
-// List receipts attached to a specific daily balance.
+// List receipts for a specific calendar day (?date=YYYY-MM-DD).
 router.get(
-  '/daily-balance/:dailyBalanceId',
+  '/day',
   requireAuth,
-  validate(receiptsByDailyBalanceParamSchema, 'params'),
+  validate(getReceiptsByDayQuerySchema, 'query'),
   getReceiptsByDayHandler,
 );
 

@@ -33,24 +33,6 @@ async function toDTO(receipt: Receipt): Promise<ReceiptDTO> {
 }
 
 /**
- * Finds a daily balance by primary key and enforces ownership: 404 when the
- * record does not exist, 403 when it belongs to another user.
- */
-async function findOwnedBalance(userId: number, id: number): Promise<DailyBalance> {
-  const balance = await DailyBalance.findByPk(id);
-
-  if (!balance) {
-    throw new AppError('Daily balance not found', 404);
-  }
-
-  if (balance.fk_user !== userId) {
-    throw new AppError('You are not authorized to access this daily balance', 403);
-  }
-
-  return balance;
-}
-
-/**
  * Resolves the daily balance for the authenticated user and the provided date.
  * Ownership is enforced implicitly: a balance belonging to another user simply
  * does not match the (fk_user, date) filter and is reported as not found. When
@@ -168,22 +150,22 @@ export async function uploadReceipts(
 }
 
 /**
- * Returns every receipt attached to the given daily balance (ownership verified
- * through that balance).
+ * Returns every receipt for the given calendar day (ownership enforced through
+ * the `fk_user` column). Receipts are matched directly against the `date`
+ * column, so no daily-balance record is required; when no receipts exist for
+ * that day an empty array is returned.
  */
-export async function getReceiptsByDailyBalance(
+export async function getReceiptsByDay(
   userId: number,
-  dailyBalanceId: number,
+  date: string,
 ): Promise<ReceiptDTO[]> {
-  await findOwnedBalance(userId, dailyBalanceId);
-
   const order: Order = [
     ['created_at', 'ASC'],
     ['pk_receipts', 'ASC'],
   ];
 
   const receipts = await Receipt.findAll({
-    where: { fk_daily_balance: dailyBalanceId, fk_user: userId },
+    where: { date, fk_user: userId },
     order,
   });
 

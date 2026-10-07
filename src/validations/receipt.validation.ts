@@ -48,8 +48,15 @@ export const createReceiptsSchema = z.object({
   type: z.nativeEnum(ReceiptType).default(ReceiptType.PURCHASE),
 });
 
-export const receiptsByDailyBalanceParamSchema = z.object({
-  dailyBalanceId: positiveIntSchema('Daily balance ID'),
+/**
+ * Query parameters for the GET /receipts/day endpoint.
+ *
+ * - `date` (required): calendar day (`YYYY-MM-DD`) whose receipts are returned.
+ *   Receipts are matched directly against the `receipts.date` column, so no
+ *   daily-balance record is required to list them.
+ */
+export const getReceiptsByDayQuerySchema = z.object({
+  date: receiptDateSchema,
 });
 
 export const receiptIdParamSchema = z.object({
