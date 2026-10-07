@@ -48,15 +48,33 @@ export const createReceiptsSchema = z.object({
   type: z.nativeEnum(ReceiptType).default(ReceiptType.PURCHASE),
 });
 
+export const GET_RECEIPTS_BY_DAY_DEFAULT_PAGE = 1;
+export const GET_RECEIPTS_BY_DAY_DEFAULT_LIMIT = 20;
+export const GET_RECEIPTS_BY_DAY_MAX_LIMIT = 100;
+
 /**
  * Query parameters for the GET /receipts/day endpoint.
  *
  * - `date` (required): calendar day (`YYYY-MM-DD`) whose receipts are returned.
  *   Receipts are matched directly against the `receipts.date` column, so no
  *   daily-balance record is required to list them.
+ * - `page` (optional): 1-based page number. Falls back to 1 when absent.
+ * - `limit` (optional): number of receipts per page. Falls back to 20 when
+ *   absent and is capped at 100 to keep the query bounded.
  */
 export const getReceiptsByDayQuerySchema = z.object({
   date: receiptDateSchema,
+  page: z.coerce
+    .number()
+    .int('Page must be an integer')
+    .min(1, 'Page must be at least 1')
+    .default(GET_RECEIPTS_BY_DAY_DEFAULT_PAGE),
+  limit: z.coerce
+    .number()
+    .int('Limit must be an integer')
+    .min(1, 'Limit must be at least 1')
+    .max(GET_RECEIPTS_BY_DAY_MAX_LIMIT, 'Limit must be at most 100')
+    .default(GET_RECEIPTS_BY_DAY_DEFAULT_LIMIT),
 });
 
 export const receiptIdParamSchema = z.object({

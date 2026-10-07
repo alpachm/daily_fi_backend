@@ -29,3 +29,24 @@ export interface ReceiptDTO {
   createdAt: Date;
   updatedAt: Date;
 }
+
+/**
+ * Pagination metadata attached to paginated collection responses.
+ */
+export interface PaginationMeta {
+  totalItems: number;
+  totalPages: number;
+  currentPage: number;
+  itemsPerPage: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
+/**
+ * Response payload returned by `GET /receipts/day`.
+ */
+export interface GetReceiptsByDayResponse {
+  date: string;
+  receipts: ReceiptDTO[];
+  pagination: PaginationMeta;
+}
