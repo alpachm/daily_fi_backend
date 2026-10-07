@@ -1762,7 +1762,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/receipts/day?date=2026-10-07&page=1&limit=20",
+              "raw": "{{base_url}}/receipts/day?date=2026-10-07&type=PURCHASE&page=1&limit=20",
               "host": [
                 "{{base_url}}"
               ],
@@ -1777,6 +1777,11 @@
                   "description": "Día en formato YYYY-MM-DD (obligatorio)"
                 },
                 {
+                  "key": "type",
+                  "value": "PURCHASE",
+                  "description": "Tipo de comprobante: PURCHASE o SALE (opcional, insensible a mayúsculas)"
+                },
+                {
                   "key": "page",
                   "value": "1",
                   "description": "Número de página (opcional, por defecto 1, mínimo 1)"
@@ -1788,7 +1793,7 @@
                 }
               ]
             },
-            "description": "Lista los comprobantes del día indicado de forma paginada.\n\n- **Método:** `GET`\n- **Requiere token:** Sí\n- **Parámetros de query:**\n  - `date` (YYYY-MM-DD, obligatorio).\n  - `page` (opcional, entero positivo, por defecto 1).\n  - `limit` (opcional, entero positivo, por defecto 20, máximo 100).\n\n> Cada comprobante incluye una `fileUrl` temporal (URL firmada) generada al momento. La respuesta incluye metadatos de paginación (`totalItems`, `totalPages`, `currentPage`, `itemsPerPage`, `hasNextPage`, `hasPrevPage`). Si no hay comprobantes para esa fecha, devuelve un arreglo vacío."
+            "description": "Lista los comprobantes del día indicado de forma paginada.\n\n- **Método:** `GET`\n- **Requiere token:** Sí\n- **Parámetros de query:**\n  - `date` (YYYY-MM-DD, obligatorio).\n  - `type` (opcional, `PURCHASE` o `SALE`, insensible a mayúsculas; `400` si es inválido).\n  - `page` (opcional, entero positivo, por defecto 1).\n  - `limit` (opcional, entero positivo, por defecto 20, máximo 100).\n\n> Cada comprobante incluye una `fileUrl` temporal (URL firmada) generada al momento. La respuesta incluye metadatos de paginación (`totalItems`, `totalPages`, `currentPage`, `itemsPerPage`, `hasNextPage`, `hasPrevPage`). Si no hay comprobantes para esa fecha, devuelve un arreglo vacío."
           },
           "response": [
             {
@@ -1796,7 +1801,7 @@
               "originalRequest": {
                 "method": "GET",
                 "header": [],
-                "url": "{{base_url}}/receipts/day?date=2026-10-07&page=1&limit=20"
+                "url": "{{base_url}}/receipts/day?date=2026-10-07&type=PURCHASE&page=1&limit=20"
               },
               "status": "OK",
               "code": 200,
@@ -1809,7 +1814,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Receipts retrieved successfully\",\n  \"data\": {\n    \"date\": \"2026-10-07\",\n    \"receipts\": [\n      {\n        \"id\": 2,\n        \"userId\": 1,\n        \"dailyBalanceId\": 1,\n        \"fileUrl\": \"https://<bucket>.r2.cloudflarestorage.com/...?X-Amz-Signature=...\",\n        \"type\": \"PURCHASE\",\n        \"date\": \"2026-10-07\",\n        \"description\": \"Compra de insumos\",\n        \"category\": \"Insumos\",\n        \"createdAt\": \"2026-10-07T10:00:00.000Z\",\n        \"updatedAt\": \"2026-10-07T10:00:00.000Z\"\n      }\n    ],\n    \"pagination\": {\n      \"totalItems\": 133,\n      \"totalPages\": 7,\n      \"currentPage\": 1,\n      \"itemsPerPage\": 20,\n      \"hasNextPage\": true,\n      \"hasPrevPage\": false\n    }\n  }\n}"
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Receipts retrieved successfully\",\n  \"data\": {\n    \"date\": \"2026-10-07\",\n    \"type\": \"PURCHASE\",\n    \"receipts\": [\n      {\n        \"id\": 2,\n        \"userId\": 1,\n        \"dailyBalanceId\": 1,\n        \"fileUrl\": \"https://<bucket>.r2.cloudflarestorage.com/...?X-Amz-Signature=...\",\n        \"type\": \"PURCHASE\",\n        \"date\": \"2026-10-07\",\n        \"description\": \"Compra de insumos\",\n        \"category\": \"Insumos\",\n        \"createdAt\": \"2026-10-07T10:00:00.000Z\",\n        \"updatedAt\": \"2026-10-07T10:00:00.000Z\"\n      }\n    ],\n    \"pagination\": {\n      \"totalItems\": 45,\n      \"totalPages\": 3,\n      \"currentPage\": 1,\n      \"itemsPerPage\": 20,\n      \"hasNextPage\": true,\n      \"hasPrevPage\": false\n    }\n  }\n}"
             },
             {
               "name": "400 Bad Request — Fecha inválida",
@@ -1850,6 +1855,26 @@
               ],
               "cookie": [],
               "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Validation failed\",\n  \"errors\": [\n    {\n      \"field\": \"page\",\n      \"message\": \"Page must be at least 1\"\n    },\n    {\n      \"field\": \"limit\",\n      \"message\": \"Limit must be at most 100\"\n    }\n  ]\n}"
+            },
+            {
+              "name": "400 Bad Request — Tipo inválido",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/receipts/day?date=2026-10-07&type=INVALID"
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Validation failed\",\n  \"errors\": [\n    {\n      \"field\": \"type\",\n      \"message\": \"Type must be either PURCHASE or SALE\"\n    }\n  ]\n}"
             },
             {
               "name": "401 Unauthorized — Token faltante o inválido",

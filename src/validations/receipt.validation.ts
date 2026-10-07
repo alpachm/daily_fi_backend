@@ -58,12 +58,21 @@ export const GET_RECEIPTS_BY_DAY_MAX_LIMIT = 100;
  * - `date` (required): calendar day (`YYYY-MM-DD`) whose receipts are returned.
  *   Receipts are matched directly against the `receipts.date` column, so no
  *   daily-balance record is required to list them.
+ * - `type` (optional): receipt type to filter by (`PURCHASE` or `SALE`). The
+ *   value is trimmed and upper-cased before validation, so `purchase` and
+ *   `sale` are accepted. When omitted, receipts of every type are returned.
  * - `page` (optional): 1-based page number. Falls back to 1 when absent.
  * - `limit` (optional): number of receipts per page. Falls back to 20 when
  *   absent and is capped at 100 to keep the query bounded.
  */
 export const getReceiptsByDayQuerySchema = z.object({
   date: receiptDateSchema,
+  type: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .pipe(z.nativeEnum(ReceiptType, 'Type must be either PURCHASE or SALE'))
+    .optional(),
   page: z.coerce
     .number()
     .int('Page must be an integer')

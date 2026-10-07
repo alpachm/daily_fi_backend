@@ -157,15 +157,20 @@ export async function uploadReceipts(
  * Returns the receipts for the given calendar day (ownership enforced through
  * the `fk_user` column) as a paginated page, plus the total number of matching
  * receipts so the caller can build pagination metadata. Receipts are matched
- * directly against the `date` column, so no daily-balance record is required;
- * when no receipts exist for that day an empty array and a zero total are
- * returned.
+ * directly against the `date` column, so no daily-balance record is required.
+ * When a `type` is supplied it is combined with the `date` filter, so both the
+ * total count and the returned page respect the same conditions. When no
+ * receipts match, an empty array and a zero total are returned.
  */
 export async function getReceiptsByDay(
   userId: number,
   query: GetReceiptsByDayQuery,
 ): Promise<{ receipts: ReceiptDTO[]; totalItems: number }> {
-  const where = { date: query.date, fk_user: userId };
+  const where = {
+    date: query.date,
+    fk_user: userId,
+    ...(query.type ? { type: query.type } : {}),
+  };
   const limit = query.limit;
   const offset = (query.page - 1) * limit;
 

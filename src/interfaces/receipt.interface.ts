@@ -47,6 +47,7 @@ export interface PaginationMeta {
  */
 export interface GetReceiptsByDayResponse {
   date: string;
+  type?: ReceiptType;
   receipts: ReceiptDTO[];
   pagination: PaginationMeta;
 }
