@@ -205,6 +205,8 @@ export async function deleteDailyBalance(userId: number, id: number): Promise<vo
 type MonthlyAggregateRow = {
   year: string | number;
   month: string | number;
+  openingBalance: string | number | null;
+  closingBalance: string | number | null;
   totalIncome: string | number | null;
   totalExpenses: string | number | null;
 };
@@ -227,8 +229,10 @@ function buildMonthlySummaryId(year: number, month: number): number {
  * optional inclusive `startDate`/`endDate` range, then grouped by year and
  * month. Each group exposes `totalIncome` (`SUM(total_income)`),
  * `totalExpenses` (`SUM(total_expenses)`) and `netProfit` (the rounded
- * difference). Results are ordered newest-first (`ORDER BY year DESC,
- * month DESC`) and paginated with `page`/`limit`.
+ * difference), plus `openingBalance` (the first record's `opening_balance`) and
+ * `closingBalance` (the latest record's non-null `closing_balance`). Results
+ * are ordered newest-first (`ORDER BY year DESC, month DESC`) and paginated
+ * with `page`/`limit`.
  */
 export async function getMonthlyBalanceSummaries(
   userId: number,
@@ -247,6 +251,16 @@ export async function getMonthlyBalanceSummaries(
   const yearExpr = fn('EXTRACT', literal('YEAR FROM "date"'));
   const monthExpr = fn('EXTRACT', literal('MONTH FROM "date"'));
 
+  // First chronologically ordered record within the group.
+  const openingBalanceExpr = literal(
+    '(array_agg("opening_balance" ORDER BY "date" ASC))[1]',
+  );
+  // Latest chronologically ordered record within the group that still has a
+  // non-null `closing_balance`.
+  const closingBalanceExpr = literal(
+    '(array_agg("closing_balance" ORDER BY "date" DESC) FILTER (WHERE "closing_balance" IS NOT NULL))[1]',
+  );
+
   const limit = query.limit;
   const offset = (query.page - 1) * limit;
 
@@ -254,6 +268,8 @@ export async function getMonthlyBalanceSummaries(
     attributes: [
       [yearExpr, 'year'],
       [monthExpr, 'month'],
+      [openingBalanceExpr, 'openingBalance'],
+      [closingBalanceExpr, 'closingBalance'],
       [fn('SUM', col('total_income')), 'totalIncome'],
       [fn('SUM', col('total_expenses')), 'totalExpenses'],
     ],
@@ -271,6 +287,8 @@ export async function getMonthlyBalanceSummaries(
   return rows.map((row) => {
     const year = Math.round(toNumber(row.year));
     const month = Math.round(toNumber(row.month));
+    const openingBalance = roundToCents(toNumber(row.openingBalance));
+    const closingBalance = roundToCents(toNumber(row.closingBalance));
     const totalIncome = roundToCents(toNumber(row.totalIncome));
     const totalExpenses = roundToCents(toNumber(row.totalExpenses));
 
@@ -279,6 +297,8 @@ export async function getMonthlyBalanceSummaries(
       userId,
       year,
       month,
+      openingBalance,
+      closingBalance,
       totalIncome,
       totalExpenses,
       netProfit: roundToCents(totalIncome - totalExpenses),
@@ -288,6 +308,8 @@ export async function getMonthlyBalanceSummaries(
 
 type YearlyAggregateRow = {
   year: string | number;
+  openingBalance: string | number | null;
+  closingBalance: string | number | null;
   totalIncome: string | number | null;
   totalExpenses: string | number | null;
 };
@@ -298,8 +320,10 @@ type YearlyAggregateRow = {
  * Records are filtered strictly by the owner (`fk_user = userId`), grouped by
  * year, and each group exposes `totalIncome` (`SUM(total_income)`),
  * `totalExpenses` (`SUM(total_expenses)`) and `netProfit` (the rounded
- * difference). Results are ordered newest-first (`ORDER BY year DESC`) and
- * paginated with `page`/`limit`.
+ * difference), plus `openingBalance` (the first record's `opening_balance`) and
+ * `closingBalance` (the latest record's non-null `closing_balance`). Results
+ * are ordered newest-first (`ORDER BY year DESC`) and paginated with
+ * `page`/`limit`.
  */
 export async function getYearlyBalanceSummaries(
   userId: number,
@@ -309,12 +333,24 @@ export async function getYearlyBalanceSummaries(
 
   const yearExpr = fn('EXTRACT', literal('YEAR FROM "date"'));
 
+  // First chronologically ordered record within the group.
+  const openingBalanceExpr = literal(
+    '(array_agg("opening_balance" ORDER BY "date" ASC))[1]',
+  );
+  // Latest chronologically ordered record within the group that still has a
+  // non-null `closing_balance`.
+  const closingBalanceExpr = literal(
+    '(array_agg("closing_balance" ORDER BY "date" DESC) FILTER (WHERE "closing_balance" IS NOT NULL))[1]',
+  );
+
   const limit = query.limit;
   const offset = (query.page - 1) * limit;
 
   const rows = (await DailyBalance.findAll({
     attributes: [
       [yearExpr, 'year'],
+      [openingBalanceExpr, 'openingBalance'],
+      [closingBalanceExpr, 'closingBalance'],
       [fn('SUM', col('total_income')), 'totalIncome'],
       [fn('SUM', col('total_expenses')), 'totalExpenses'],
     ],
@@ -328,6 +364,8 @@ export async function getYearlyBalanceSummaries(
 
   return rows.map((row) => {
     const year = Math.round(toNumber(row.year));
+    const openingBalance = roundToCents(toNumber(row.openingBalance));
+    const closingBalance = roundToCents(toNumber(row.closingBalance));
     const totalIncome = roundToCents(toNumber(row.totalIncome));
     const totalExpenses = roundToCents(toNumber(row.totalExpenses));
 
@@ -335,6 +373,8 @@ export async function getYearlyBalanceSummaries(
       id: year,
       userId,
       year,
+      openingBalance,
+      closingBalance,
       totalIncome,
       totalExpenses,
       netProfit: roundToCents(totalIncome - totalExpenses),

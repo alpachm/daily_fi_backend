@@ -42,12 +42,19 @@ export interface DailyBalanceDTO {
  * Aggregates many `daily_balances` rows for a single (year, month) pair. Since
  * a summary has no primary key of its own, `id` is a deterministic synthetic
  * identifier shaped as `MMYYYY` (e.g. October 2026 -> 102026).
+ *
+ * - `openingBalance`: `opening_balance` of the chronologically first record in
+ *   the month.
+ * - `closingBalance`: `closing_balance` of the chronologically latest record in
+ *   the month that has a non-null `closing_balance`.
  */
 export interface MonthlyBalanceSummaryDTO {
   id: number;
   userId: number;
   year: number;
   month: number;
+  openingBalance: number;
+  closingBalance: number;
   totalIncome: number;
   totalExpenses: number;
   netProfit: number;
@@ -59,11 +66,18 @@ export interface MonthlyBalanceSummaryDTO {
  * Aggregates many `daily_balances` rows for a single year. Since a summary has
  * no primary key of its own, `id` is the aggregated year itself (e.g. 2026),
  * which is unique per user and keeps the response stable.
+ *
+ * - `openingBalance`: `opening_balance` of the chronologically first record in
+ *   the year.
+ * - `closingBalance`: `closing_balance` of the chronologically latest record in
+ *   the year that has a non-null `closing_balance`.
  */
 export interface YearlyBalanceSummaryDTO {
   id: number;
   userId: number;
   year: number;
+  openingBalance: number;
+  closingBalance: number;
   totalIncome: number;
   totalExpenses: number;
   netProfit: number;

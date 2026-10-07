@@ -1329,7 +1329,7 @@
                 }
               ]
             },
-            "description": "Agrega los balances diarios del usuario autenticado en resúmenes mensuales.\n\n- **Método:** `GET`\n- **Requiere token:** Sí\n- **Query opcional:** `startDate`, `endDate`, `page` (por defecto 1), `limit` (por defecto 12).\n\nCada elemento agrupa los registros por `year` y `month` y calcula `totalIncome` (`SUM(totalIncome)`), `totalExpenses` (`SUM(totalExpenses)`) y `netProfit` (`totalIncome - totalExpenses`). Se ordena por año y mes descendente."
+            "description": "Agrega los balances diarios del usuario autenticado en resúmenes mensuales.\n\n- **Método:** `GET`\n- **Requiere token:** Sí\n- **Query opcional:** `startDate`, `endDate`, `page` (por defecto 1), `limit` (por defecto 12).\n\nCada elemento agrupa los registros por `year` y `month` y calcula `openingBalance` (apertura del primer registro del mes), `closingBalance` (cierre del último registro con cierre no nulo), `totalIncome` (`SUM(totalIncome)`), `totalExpenses` (`SUM(totalExpenses)`) y `netProfit` (`totalIncome - totalExpenses`). Se ordena por año y mes descendente."
           },
           "response": [
             {
@@ -1350,7 +1350,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"status\": \"success\",\n  \"data\": [\n    {\n      \"id\": 102026,\n      \"userId\": 21,\n      \"year\": 2026,\n      \"month\": 10,\n      \"totalIncome\": 1500,\n      \"totalExpenses\": 450,\n      \"netProfit\": 1050\n    }\n  ]\n}"
+              "body": "{\n  \"status\": \"success\",\n  \"data\": [\n    {\n      \"id\": 102026,\n      \"userId\": 21,\n      \"year\": 2026,\n      \"month\": 10,\n      \"openingBalance\": 1000,\n      \"closingBalance\": 1500,\n      \"totalIncome\": 1500,\n      \"totalExpenses\": 450,\n      \"netProfit\": 1050\n    }\n  ]\n}"
             },
             {
               "name": "400 Bad Request — Error de validación",
@@ -1423,7 +1423,7 @@
                 }
               ]
             },
-            "description": "Agrega los balances diarios del usuario autenticado en resúmenes anuales.\n\n- **Método:** `GET`\n- **Requiere token:** Sí\n- **Query opcional:** `page` (por defecto 1), `limit` (por defecto 10).\n\nCada elemento agrupa los registros por `year` y calcula `totalIncome` (`SUM(totalIncome)`), `totalExpenses` (`SUM(totalExpenses)`) y `netProfit` (`totalIncome - totalExpenses`). Se ordena por año descendente."
+            "description": "Agrega los balances diarios del usuario autenticado en resúmenes anuales.\n\n- **Método:** `GET`\n- **Requiere token:** Sí\n- **Query opcional:** `page` (por defecto 1), `limit` (por defecto 10).\n\nCada elemento agrupa los registros por `year` y calcula `openingBalance` (apertura del primer registro del año), `closingBalance` (cierre del último registro con cierre no nulo), `totalIncome` (`SUM(totalIncome)`), `totalExpenses` (`SUM(totalExpenses)`) y `netProfit` (`totalIncome - totalExpenses`). Se ordena por año descendente."
           },
           "response": [
             {
@@ -1444,7 +1444,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"status\": \"success\",\n  \"data\": [\n    {\n      \"id\": 2026,\n      \"userId\": 21,\n      \"year\": 2026,\n      \"totalIncome\": 18500,\n      \"totalExpenses\": 5200,\n      \"netProfit\": 13300\n    }\n  ]\n}"
+              "body": "{\n  \"status\": \"success\",\n  \"data\": [\n    {\n      \"id\": 2026,\n      \"userId\": 21,\n      \"year\": 2026,\n      \"openingBalance\": 1000,\n      \"closingBalance\": 18500,\n      \"totalIncome\": 18500,\n      \"totalExpenses\": 5200,\n      \"netProfit\": 13300\n    }\n  ]\n}"
             },
             {
               "name": "400 Bad Request — Error de validación",
