@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
-const DATE_ONLY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+export const DATE_ONLY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
-function isValidCalendarDate(value: string): boolean {
+export function isValidCalendarDate(value: string): boolean {
   if (!DATE_ONLY_REGEX.test(value)) {
     return false;
   }

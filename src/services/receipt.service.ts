@@ -51,6 +51,37 @@ async function findOwnedBalance(userId: number, id: number): Promise<DailyBalanc
 }
 
 /**
+ * Resolves the daily balance for the authenticated user and the provided date.
+ * Ownership is enforced implicitly: a balance belonging to another user simply
+ * does not match the (fk_user, date) filter and is reported as not found. When
+ * no balance exists for the date, the upload is rejected before any file is
+ * processed or persisted.
+ */
+async function findDailyBalanceByDate(
+  userId: number,
+  date: string,
+): Promise<DailyBalance> {
+  const balance = await DailyBalance.findOne({
+    where: { fk_user: userId, date },
+  });
+
+  if (!balance) {
+    throw new AppError(
+      'No daily balance record found for the provided date. Please create a daily balance entry before uploading receipts.',
+      404,
+      [
+        {
+          field: 'date',
+          message: 'Daily balance record does not exist for this date',
+        },
+      ],
+    );
+  }
+
+  return balance;
+}
+
+/**
  * Finds a receipt by primary key and enforces ownership through its `fk_user`
  * column (mirrors the `findOwnedBalance` pattern).
  */
@@ -80,10 +111,13 @@ function buildReceiptFilename(receipt: Receipt): string {
 /**
  * Uploads a batch of receipt files to Cloudflare R2 and persists their relative
  * object keys inside a single database transaction. Each key is scoped by the
- * authenticated user's email, the daily balance date, and the operation type,
- * e.g. `user@example.com/2026/10/04/compra/1728045600_a1b2c.webp`. If the
- * database write fails, every object uploaded in this batch is removed from R2
- * before the error re-throws.
+ * authenticated user's email, the receipt date, and the operation type, e.g.
+ * `user@example.com/2026/10/04/compra/1728045600_a1b2c.webp`.
+ *
+ * The target daily balance is resolved by (userId, date) up front: when no
+ * balance exists for the date, the upload is rejected before any file is
+ * processed or persisted to R2. If the database write fails, every object
+ * uploaded in this batch is removed from R2 before the error re-throws.
  */
 export async function uploadReceipts(
   userId: number,
@@ -91,7 +125,7 @@ export async function uploadReceipts(
   files: Express.Multer.File[],
   data: CreateReceiptsInput,
 ): Promise<void> {
-  const balance = await findOwnedBalance(userId, data.fk_daily_balance);
+  const balance = await findDailyBalanceByDate(userId, data.date);
   const folder = buildReceiptFolder(userEmail, new Date(balance.date), data.type);
 
   const uploadedKeys: string[] = [];
@@ -116,7 +150,7 @@ export async function uploadReceipts(
       await Receipt.bulkCreate(
         uploadedKeys.map((key) => ({
           fk_user: userId,
-          fk_daily_balance: data.fk_daily_balance,
+          fk_daily_balance: balance.pk_daily_balance,
           file_key: key,
           type: data.type,
           date: balance.date,
