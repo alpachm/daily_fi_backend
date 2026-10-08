@@ -2,10 +2,13 @@ import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import express, { type Express, type NextFunction, type Request, type Response } from 'express';
+import express, { type Express, type Request, type Response } from 'express';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import hpp from 'hpp';
+
+import { errorHandler } from './middlewares/error.middleware';
+import apiRoutes from './routes/index';
 
 // Load environment variables from `.env` into `process.env`.
 dotenv.config();
@@ -56,25 +59,28 @@ app.use('/api', limiter);
 // Health check
 // ---------------------------------------------------------------------------
 
-app.get('/health', (_req: Request, res: Response) => {
+app.get('/api/v1/health', (_req: Request, res: Response) => {
   res.status(200).json({ status: 'ok' });
 });
+
+// ---------------------------------------------------------------------------
+// API routes (versioned under /api/v1)
+// ---------------------------------------------------------------------------
+
+app.use('/api/v1', apiRoutes);
 
 // ---------------------------------------------------------------------------
 // 404 handler
 // ---------------------------------------------------------------------------
 
 app.use((_req: Request, res: Response) => {
-  res.status(404).json({ message: 'Route not found' });
+  res.status(404).json({ status: 'fail', message: 'Route not found' });
 });
 
 // ---------------------------------------------------------------------------
 // Global error handler
 // ---------------------------------------------------------------------------
 
-app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-  console.error(err);
-  res.status(500).json({ message: 'Internal server error' });
-});
+app.use(errorHandler);
 
 export default app;

@@ -1,0 +1,90 @@
+import {
+  CreationOptional,
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from 'sequelize';
+import { sequelize } from '../database';
+
+export class DailyBalance extends Model<
+  InferAttributes<DailyBalance>,
+  InferCreationAttributes<DailyBalance>
+> {
+  declare pk_daily_balance: CreationOptional<number>;
+  declare fk_user: number;
+  declare date: string;
+  declare opening_balance: CreationOptional<number>;
+  declare closing_balance: CreationOptional<number>;
+  declare total_income: CreationOptional<number>;
+  declare total_expenses: CreationOptional<number>;
+  declare notes: string | null;
+  declare created_at: CreationOptional<Date>;
+  declare updated_at: CreationOptional<Date>;
+}
+
+DailyBalance.init(
+  {
+    pk_daily_balance: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    fk_user: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    date: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+    },
+    opening_balance: {
+      type: DataTypes.DECIMAL(12, 2),
+      allowNull: false,
+      defaultValue: 0,
+    },
+    closing_balance: {
+      type: DataTypes.DECIMAL(12, 2),
+      allowNull: false,
+      defaultValue: 0,
+    },
+    total_income: {
+      type: DataTypes.DECIMAL(12, 2),
+      allowNull: false,
+      defaultValue: 0,
+    },
+    total_expenses: {
+      type: DataTypes.DECIMAL(12, 2),
+      allowNull: false,
+      defaultValue: 0,
+    },
+    notes: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
+    },
+  },
+  {
+    sequelize,
+    tableName: 'daily_balances',
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    indexes: [
+      {
+        name: 'daily_balances_user_date_unique',
+        unique: true,
+        fields: ['fk_user', 'date'],
+      },
+    ],
+  },
+);

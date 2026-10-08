@@ -22,3 +22,10 @@ Thumbs.db
 # Editor / IDE
 .vscode/
 .idea/
+
+# Ignorar archivos locales de script y data
+scripts/data.txt
+scripts/seedDailyBalances.ts
+
+# O si no quieres trackear nada dentro de scripts:
+scripts/
