@@ -39,4 +39,12 @@ export const sequelize: Sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD,
   port: DB_PORT,
   dialect: 'postgres',
   logging: false,
+  dialectOptions: {
+      ssl: process.env.NODE_ENV === 'production' || process.env.DB_HOST?.includes('render.com')
+        ? {
+            require: true,
+            rejectUnauthorized: false,
+          }
+        : false,
+    },
 });
