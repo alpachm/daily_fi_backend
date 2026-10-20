@@ -32,6 +32,11 @@ DB_PORT=5432
 JWT_SECRET=replace_with_a_long_random_secret
 JWT_EXPIRES_IN=7d
 
+# Email (Resend)
+RESEND_API_KEY=your_resend_api_key
+EMAIL_FROM=Daily Fi <onboarding@resend.dev>
+FRONTEND_URL=http://localhost:5173
+
 R2_ACCOUNT_ID=account_id
 R2_ACCESS_KEY_ID=access_key_id
 R2_SECRET_ACCESS_KEY=secret_access_key
