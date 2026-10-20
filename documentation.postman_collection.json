@@ -75,7 +75,7 @@
     },
     {
       "name": "auth",
-      "description": "Registro, inicio de sesión y gestión de credenciales de la cuenta.",
+      "description": "Registro e inicio de sesión de la cuenta.",
       "item": [
         {
           "name": "register",
@@ -373,7 +373,13 @@
               "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Token has been revoked. Please log in again.\"\n}"
             }
           ]
-        },
+        }
+      ]
+    },
+    {
+      "name": "users",
+      "description": "Gestión de la cuenta del usuario (cambio y recuperación de contraseña, y eliminación de cuenta).",
+      "item": [
         {
           "name": "change password",
           "request": {
@@ -490,7 +496,163 @@
           ]
         },
         {
-          "name": "delete",
+          "name": "forgot password",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"usuario@correo.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/users/forgot-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "forgot-password"
+              ]
+            },
+            "description": "Solicita el envío de un enlace para restablecer la contraseña. Siempre responde éxito para evitar enumeración de usuarios.\n\n- **Método:** `POST`\n- **Requiere token:** No\n- **Cuerpo:** `email` (válido).\n\nÉxito: `200 OK` con mensaje genérico."
+          },
+          "response": [
+            {
+              "name": "200 OK — Respuesta genérica (exista o no el usuario)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": "{{base_url}}/users/forgot-password"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"data\": {\n    \"message\": \"If an account exists for that email, a password reset link has been sent.\"\n  }\n}"
+            },
+            {
+              "name": "400 Bad Request — Error de validación",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": "{{base_url}}/users/forgot-password"
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Validation failed\",\n  \"errors\": [\n    { \"field\": \"email\", \"message\": \"Invalid email format\" }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "reset password",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"token_recibido_por_correo\",\n  \"newPassword\": \"NuevaPassword123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/users/reset-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "reset-password"
+              ]
+            },
+            "description": "Restablece la contraseña usando el token recibido por correo.\n\n- **Método:** `POST`\n- **Requiere token:** No\n- **Cuerpo:** `token` y `newPassword` (8-72 caracteres, con mayúscula, minúscula y número).\n\nÉxito: `200 OK`."
+          },
+          "response": [
+            {
+              "name": "200 OK — Contraseña restablecida",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": "{{base_url}}/users/reset-password"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"data\": {\n    \"message\": \"Password reset successfully\"\n  }\n}"
+            },
+            {
+              "name": "400 Bad Request — Token inválido o expirado",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": "{{base_url}}/users/reset-password"
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Invalid or expired reset token\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "delete account",
           "request": {
             "method": "DELETE",
             "header": [
