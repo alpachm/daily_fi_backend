@@ -33,6 +33,20 @@ export async function changePassword(
     throw new AppError('Current password is incorrect', 401);
   }
 
+  const isSameAsCurrentPassword = await bcrypt.compare(
+    input.newPassword,
+    user.password,
+  );
+
+  if (isSameAsCurrentPassword) {
+    throw new AppError('Validation failed', 400, [
+      {
+        field: 'newPassword',
+        message: 'New password cannot be the same as the current password',
+      },
+    ]);
+  }
+
   const hashedPassword = await bcrypt.hash(input.newPassword, BCRYPT_SALT_ROUNDS);
   await user.update({ password: hashedPassword });
 }
