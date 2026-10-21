@@ -454,6 +454,26 @@
               "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Validation failed\",\n  \"errors\": [\n    { \"field\": \"newPassword\", \"message\": \"Password must be at least 8 characters long\" }\n  ]\n}"
             },
             {
+              "name": "400 Bad Request — La nueva contraseña es igual a la actual",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{base_url}}/users/change-password"
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"fail\",\n  \"message\": \"Validation failed\",\n  \"errors\": [\n    { \"field\": \"newPassword\", \"message\": \"New password cannot be the same as the current password\" }\n  ]\n}"
+            },
+            {
               "name": "401 Unauthorized — Token faltante o inválido",
               "originalRequest": {
                 "method": "PATCH",
